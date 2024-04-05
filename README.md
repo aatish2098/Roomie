@@ -23,3 +23,8 @@ python manage.py migrate
 python3 manage.py runserver
 ```
 5. You should see a message indicating the server is running, and you can visit http://127.0.0.1:8000 in your web browser to see the default Django welcome page.
+
+6. To save your database changes in mysql before commiting and pushing to git
+```
+.\mysqldump -u root -p roomie > roomie.sql    
+```
