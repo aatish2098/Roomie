@@ -16,10 +16,16 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from django.contrib.auth import views as auth_views
 
+from Roomie import views
 from Roomie.views import register
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('register/', register, name='register'),
+    path('homepage/', views.homepage, name='homepage'),
+    path('login/', auth_views.LoginView.as_view(template_name='login.html', next_page='main'), name='login'),
+    path('main/', views.main, name='main'),
+    path('main/sign-out-url', auth_views.LogoutView.as_view(next_page='homepage'), name='logout'),
 ]

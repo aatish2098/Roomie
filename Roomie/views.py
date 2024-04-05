@@ -1,34 +1,55 @@
-from django import forms
+from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
-from .models import UserProfile
+from django.shortcuts import render, redirect
+from django.db import connection
 
-class UserRegistrationForm(forms.ModelForm):
-    username = forms.CharField(max_length=20)
-    first_name = forms.CharField(max_length=20)
-    last_name = forms.CharField(max_length=20)
-    email = forms.EmailField()
-    password = forms.CharField(widget=forms.PasswordInput())
+from Roomie.forms import RegistrationForm
 
-    DOB = forms.DateField()
-    gender = forms.IntegerField()
-    Phone = forms.CharField(max_length=20, required=False)
 
-    class Meta:
-        model = User
-        fields = ['username', 'first_name', 'last_name', 'email', 'password']
+def register(request):
+    if request.method == 'POST':
+        form = RegistrationForm(request.POST)
+        if form.is_valid():
+            # Extract data from POST request
+            username = request.POST.get('username')
+            first_name = request.POST.get('first_name')
+            last_name = request.POST.get('last_name')
+            email = request.POST.get('email')
+            password = request.POST.get('password')
+            dob = request.POST.get('dob')
+            gender = request.POST.get('gender')  # Make sure this is an integer
+            phone = request.POST.get('phone')
 
-    def save(self, commit=True):
-        user = super(UserRegistrationForm, self).save(commit=False)
-        user.set_password(self.cleaned_data['password'])
-        if commit:
-            user.save()
-
-            # Create UserProfile
-            user_profile = UserProfile.objects.create(
-                user=user,
-                DOB=self.cleaned_data['DOB'],
-                gender=self.cleaned_data['gender'],
-                Phone=self.cleaned_data['Phone']
+            # Create User object
+            user = User.objects.create_user(
+                username=username,
+                first_name=first_name,
+                last_name=last_name,
+                email=email,
+                password=password  # Password is hashed automatically
             )
 
-        return user
+            # Insert additional details into 'users' table using raw SQL
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    INSERT INTO users (username, first_name, last_name, DOB, gender, email, Phone, passwd)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                    """, [username, first_name, last_name, dob, gender, email, phone, make_password(password)])
+
+            return redirect('login')
+        else:
+            # Form data is not valid, return to the registration page with validation errors
+            return render(request, 'register.html', {'form': form})
+    else:
+        form = RegistrationForm()
+        return render(request, 'register.html', {'form': form})
+
+
+def homepage(request):
+    # This view will render a template called 'homepage.html'
+    return render(request, 'homepage.html')
+
+def main(request):
+    # Logic for the main view
+    return render(request, 'main.html')
+
