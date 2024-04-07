@@ -1,6 +1,7 @@
 from django import forms
 from django.core.validators import RegexValidator
 from django.contrib.auth.models import User
+from .models import Pet 
 import re
 
 class RegistrationForm(forms.ModelForm):
@@ -33,3 +34,33 @@ class RegistrationForm(forms.ModelForm):
         if User.objects.filter(username=username).exists():
             raise forms.ValidationError('A user with that username already exists.')
         return username
+
+class PetRegistrationForm(forms.ModelForm):
+
+    class Meta:
+        model = Pet
+        fields = ['petName', 'petType', 'petSize']
+        petTypes = [
+            ("null",""),
+            ('bird', 'Bird'),
+            ('cat', 'Cat'),
+            ('dog', 'Dog'),
+            ('frog', 'Frog'),
+            ('guineaPig', 'Guinea Pig'),
+            ('hamster', 'Hamster'),
+            ('rabbit', 'Rabbit'),
+            ('reptile', 'Reptile'),
+        ]
+
+        petSizes = [
+            ("null", ""),
+            ("small", "Small"),
+            ("medium", "Medium"),
+            ("large", "Large"),
+        ]
+
+        widgets = {
+            'petName': forms.TextInput(attrs={'class': 'form-control'}),
+            'petType': forms.Select(choices=petTypes, attrs={'class': 'form-control'}),
+            'petSize': forms.Select(choices=petSizes, attrs={'class': 'form-control'}),
+        }
