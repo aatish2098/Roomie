@@ -1,9 +1,10 @@
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
+from django.views.generic.edit import CreateView
 from django.shortcuts import render, redirect
 from django.db import connection
-
 from Roomie.forms import RegistrationForm
+from .forms import PetRegistrationForm
 
 
 def register(request):
@@ -53,3 +54,6 @@ def main(request):
     # Logic for the main view
     return render(request, 'main.html')
 
+class PetView(CreateView):
+    form_class = PetRegistrationForm
+    template_name='pet.html'
