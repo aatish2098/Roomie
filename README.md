@@ -1,3 +1,7 @@
+We were able to complete the login and registration pages with backend support by April 7th. We have prepared the html for pet registration but have not connected it to the back end yet. 
+
+Note: (Jeremy) had a lot of issues downloading MySQL and logging into the database, so I was only able to get the server up and running today (April 7th). I plan to commit my required features by April 14th.
+
 Initialise the database by making changes in the settings.py file and use the database name, username and password for your local MySQL server.
 
 Commands to run:
