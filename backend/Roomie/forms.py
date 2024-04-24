@@ -9,7 +9,7 @@ class RegistrationForm(forms.ModelForm):
     first_name = forms.CharField(max_length=20)
     last_name = forms.CharField(max_length=20)
     email = forms.EmailField()
-    phone = forms.CharField(max_length=20, validators=[RegexValidator(r'^\+?1?\d{9,15}$', 'Enter a valid phone number.')])
+    phone = forms.CharField(max_length=20)
     password = forms.CharField(widget=forms.PasswordInput())
     password2 = forms.CharField(widget=forms.PasswordInput(), label="Confirm password")
     dob = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))

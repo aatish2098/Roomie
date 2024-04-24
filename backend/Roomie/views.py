@@ -5,22 +5,35 @@ from django.shortcuts import render, redirect
 from django.db import connection
 from Roomie.forms import RegistrationForm
 from .forms import PetRegistrationForm
+from rest_framework.response import Response
+from rest_framework.decorators import api_view, permission_classes, parser_classes
 
-
+@api_view(['POST'])
 def register(request):
     if request.method == 'POST':
-        form = RegistrationForm(request.POST)
+        form = RegistrationForm({
+            'username': request.data.get('username'),
+            'first_name': request.data.get('first_name'),
+            'last_name': request.data.get('last_name'),
+            'email': request.data.get('email'),
+            'phone': request.data.get('phone'),
+            'password': request.data.get('password'),
+            'password2': request.data.get('password2'),
+            'dob': request.data.get('dob'),
+            'gender': request.data.get('gender'),
+        })
+        print(form.errors)
         if form.is_valid():
-            # Extract data from POST request
-            username = request.POST.get('username')
-            first_name = request.POST.get('first_name')
-            last_name = request.POST.get('last_name')
-            email = request.POST.get('email')
-            password = request.POST.get('password')
-            dob = request.POST.get('dob')
-            gender = request.POST.get('gender')  # Make sure this is an integer
-            phone = request.POST.get('phone')
-
+            print('yes')
+        #     # Extract data from POST request
+            username = request.data.get('username')
+            first_name = request.data.get('first_name')
+            last_name = request.data.get('last_name')
+            email = request.data.get('email')
+            password = request.data.get('password')
+            dob = request.data.get('dob')
+            gender = request.data.get('gender')  # Make sure this is an integer
+            phone = request.data.get('phone')
             # Create User object
             user = User.objects.create_user(
                 username=username,
@@ -31,20 +44,25 @@ def register(request):
             )
 
             # Insert additional details into 'users' table using raw SQL
+    
+
             with connection.cursor() as cursor:
                 cursor.execute("""
                     INSERT INTO users (username, first_name, last_name, DOB, gender, email, Phone, passwd)
                     VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
                     """, [username, first_name, last_name, dob, gender, email, phone, make_password(password)])
 
-            return redirect('login')
+            response_data = {'message': "User created successfully"}
+            return Response(response_data)
         else:
-            # Form data is not valid, return to the registration page with validation errors
-            return render(request, 'register.html', {'form': form})
+            response_data = {'message': "Invalid Credentials"}
+            return Response(response_data)
+    # else:
+    #     form = RegistrationForm()
+    #     return render(request, 'register.html', {'form': form})
     else:
-        form = RegistrationForm()
-        return render(request, 'register.html', {'form': form})
-
+        response_data = {'message': "Invalid Request"}
+        return Response(response_data)
 
 def homepage(request):
     # This view will render a template called 'homepage.html'
