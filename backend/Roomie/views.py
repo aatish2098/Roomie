@@ -7,6 +7,9 @@ from Roomie.forms import RegistrationForm
 from .forms import PetRegistrationForm
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes, parser_classes
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.views import TokenObtainPairView
+from .serializers import * 
 
 @api_view(['POST'])
 def register(request):
@@ -24,7 +27,6 @@ def register(request):
         })
         print(form.errors)
         if form.is_valid():
-            print('yes')
         #     # Extract data from POST request
             username = request.data.get('username')
             first_name = request.data.get('first_name')
@@ -34,7 +36,21 @@ def register(request):
             dob = request.data.get('dob')
             gender = request.data.get('gender')  # Make sure this is an integer
             phone = request.data.get('phone')
-            # Create User object
+            
+            # Check if user already exists in MySql
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    SELECT * 
+                    FROM users
+                    WHERE username = %s
+                    """, [username])
+                userNameExists = cursor.fetchone()
+            
+            if userNameExists:
+                response_data = {'message': "Invalid Credentials: Username Possibly Already Taken"}
+                return Response(response_data)
+
+            # Create New User Object
             user = User.objects.create_user(
                 username=username,
                 first_name=first_name,
@@ -43,8 +59,6 @@ def register(request):
                 password=password  # Password is hashed automatically
             )
 
-            # Insert additional details into 'users' table using raw SQL
-    
 
             with connection.cursor() as cursor:
                 cursor.execute("""
@@ -55,14 +69,24 @@ def register(request):
             response_data = {'message': "User created successfully"}
             return Response(response_data)
         else:
-            response_data = {'message': "Invalid Credentials"}
+            response_data = {'message': "Invalid Credentials: Username Possibly Already Taken"}
             return Response(response_data)
-    # else:
-    #     form = RegistrationForm()
-    #     return render(request, 'register.html', {'form': form})
     else:
         response_data = {'message': "Invalid Request"}
         return Response(response_data)
+
+class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+    def validate(self, attrs):
+        data = super().validate(attrs)
+        serializer=UserSerializerWithToken(self.user).data
+        for k,v in serializer.items():
+            data[k]=v
+
+        print(data)
+        return data
+    
+class MyTokenObtainPairView(TokenObtainPairView):
+    serializer_class=MyTokenObtainPairSerializer
 
 def homepage(request):
     # This view will render a template called 'homepage.html'

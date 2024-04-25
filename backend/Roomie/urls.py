@@ -25,7 +25,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('register/', register, name='register'),
     path('homepage/', views.homepage, name='homepage'),
-    path('login/', auth_views.LoginView.as_view(template_name='login.html', next_page='main'), name='login'),
+    path('login/',MyTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('main/', views.main, name='main'),
     path('main/sign-out-url', auth_views.LogoutView.as_view(next_page='homepage'), name='logout'),
     path('pet/', PetView.as_view(), name='pet'),

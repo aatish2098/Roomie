@@ -63,7 +63,7 @@ export const signup =
     }
   };
 
-export const login = (email, password) => async (dispatch) => {
+export const login = (username, password) => async (dispatch) => {
   try {
     dispatch({
       type: USER_LOGIN_REQUEST,
@@ -76,9 +76,9 @@ export const login = (email, password) => async (dispatch) => {
     };
     console.log("Function working");
     const { data } = await axios.post(
-      "/api/users/login/",
+      "http://127.0.0.1:8000/login/",
       {
-        username: email,
+        username: username,
         password: password,
       },
       config
