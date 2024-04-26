@@ -43,12 +43,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-<<<<<<< HEAD:backend/Roomie/settings.py
     "rest_framework",
     "corsheaders",
-=======
     # "Roomie.apps.RoomieConfig",
->>>>>>> d6d6a46029ff7345a2179d5c4e7e980b2a97f14e:Roomie/settings.py
 ]
 
 MIDDLEWARE = [

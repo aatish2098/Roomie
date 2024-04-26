@@ -16,19 +16,16 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-<<<<<<< HEAD:backend/Roomie/urls.py
 from django.contrib.auth import views as auth_views
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+)
 
 from Roomie import views
-=======
-from django.views.generic import TemplateView
-
->>>>>>> d6d6a46029ff7345a2179d5c4e7e980b2a97f14e:Roomie/urls.py
 from Roomie.views import *
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-<<<<<<< HEAD:backend/Roomie/urls.py
     path('register/', register, name='register'),
     path('homepage/', views.homepage, name='homepage'),
     path('login/',MyTokenObtainPairView.as_view(), name='token_obtain_pair'),
@@ -38,9 +35,4 @@ urlpatterns = [
     path('<str:id>/addPet/', addPet, name='addPet'),
     path('<str:id>/editPet/', editPet, name='editPet'),
     path('<str:id>/<str:petName>/<str:petType>/', deletePet, name='deletePet'),
-=======
-    path('register/', UserRegistrationForm, name='register'),
-    # path('pet/', PetRegistrationForm, name='pet'),
-    path('pet/', PetView.as_view(), name='pet'),
->>>>>>> d6d6a46029ff7345a2179d5c4e7e980b2a97f14e:Roomie/urls.py
 ]
