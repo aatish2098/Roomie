@@ -1,5 +1,8 @@
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
 from django.views.generic.edit import CreateView
 from django.shortcuts import render, redirect
 from django.db import connection
@@ -11,7 +14,8 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django.contrib.auth import authenticate
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
-from .serializers import * 
+import json
+from .serializers import *
 
 @api_view(['POST'])
 def register(request):
@@ -101,6 +105,7 @@ def main(request):
 class PetView(CreateView):
     form_class = PetRegistrationForm
     template_name='pet.html'
+
 
 
 @api_view(['GET'])
@@ -197,3 +202,37 @@ def deletePet(request, id, petName, petType):
 
     
     return Response({"message": "Pet successfully deleted."})
+
+@csrf_exempt  # Use this decorator to exempt this view from CSRF verification.
+@require_http_methods(["POST"])  # This view only accepts POST requests.
+def budgeting_view(request):
+    if request.method == 'POST':
+        # Assuming the body of the request is JSON
+        data = json.loads(request.body)
+        zipcode = data.get('zipcode')
+        numBathrooms = int(data.get('numBathrooms'))
+        numBedrooms = int(data.get('numBedrooms'))
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT AVG(AU.MonthlyRent) AS AverageRent
+                FROM ApartmentUnit AU
+                JOIN ApartmentBuilding AB ON AU.CompanyName = AB.CompanyName AND AU.BuildingName = AB.BuildingName
+                WHERE AB.AddrZipCode = %s
+                AND (SELECT COUNT(*) FROM Rooms WHERE UnitRentID = AU.UnitRentID AND description LIKE 'bedroom%%') = %s
+                AND (SELECT COUNT(*) FROM Rooms WHERE UnitRentID = AU.UnitRentID AND description LIKE 'bathroom%%') = %s
+            """, [zipcode, numBedrooms, numBathrooms])
+            result = cursor.fetchone()
+
+        if result:
+            average_rent = result[0]
+            return JsonResponse({
+                'status': 'success',
+                'data': {
+                    'zipcode': zipcode,
+                    'numBedrooms': numBedrooms,
+                    'numBathrooms': numBathrooms,
+                    'averageRent': average_rent
+                }
+            }, status=200)
+        else:
+            return JsonResponse({'status': 'error', 'message': 'No data found'}, status=404)

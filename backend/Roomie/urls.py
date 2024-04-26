@@ -35,4 +35,6 @@ urlpatterns = [
     path('<str:id>/addPet/', addPet, name='addPet'),
     path('<str:id>/editPet/', editPet, name='editPet'),
     path('<str:id>/<str:petName>/<str:petType>/', deletePet, name='deletePet'),
+  path('budgeting/', budgeting_view, name='budgeting_api'),
+
 ]

@@ -1,6 +1,7 @@
 import React from "react";
 import { Container } from "react-bootstrap";
 import Header from "./components/Header";
+import Budgeting from './components/Budgeting';
 import { HashRouter as Router, Routes, Route } from "react-router-dom";
 import HomeScreen from "./screens/HomeScreen";
 import SignUpScreen from "./screens/SignUpScreen";
@@ -25,6 +26,7 @@ export default function App() {
           ></Route>
           <Route exact path="/signup" element={<SignUpScreen />}></Route>
           <Route exact path="/settings" element={<SettingsScreen />}></Route>
+          <Route exact path="/budgeting" element={<Budgeting />} />
           <Route exact path="/login" element={<LoginScreen />}></Route>
           <Route path="/profile/:id" element={<UserProfileScreen />} />
         </Routes>
