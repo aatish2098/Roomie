@@ -236,3 +236,37 @@ def budgeting_view(request):
             }, status=200)
         else:
             return JsonResponse({'status': 'error', 'message': 'No data found'}, status=404)
+
+@csrf_exempt  # Use this decorator to exempt this view from CSRF verification.
+@require_http_methods(["POST"])
+def listing_view(request):
+    try:
+        # Parse JSON data from the request
+        data = json.loads(request.body)
+        building_name = data.get('BuildingName')
+        company_name = data.get('CompanyName')
+
+        # Validate input
+        if not building_name or not company_name:
+            return JsonResponse({'error': 'Missing BuildingName or CompanyName'}, status=400)
+
+        # SQL Query to fetch data from ApartmentUnit table
+        query = """
+            SELECT * FROM ApartmentUnit
+            WHERE BuildingName = %s AND CompanyName = %s;
+        """
+
+        with connection.cursor() as cursor:
+            cursor.execute(query, [building_name, company_name])
+            columns = [col[0] for col in cursor.description]
+            results = [
+                dict(zip(columns, row))
+                for row in cursor.fetchall()
+            ]
+
+        return JsonResponse(results, safe=False)  # Use safe=False when returning a list
+
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
