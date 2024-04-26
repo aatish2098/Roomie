@@ -1,165 +1,145 @@
-import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { fetchListings, createListing } from "../actions/listingsActions";
-import {
-  Container,
-  Row,
-  Col,
-  Card,
-  Button,
-  Form,
-  Modal,
-  ModalBody,
-  Carousel,
-} from "react-bootstrap";
-import { redirect, useNavigate } from "react-router-dom";
+import React, { useState } from 'react';
+import axios from 'axios';
 
-function ListingsScreen() {
-  const dispatch = useDispatch();
-  const listingsState = useSelector((state) => state.listingsView);
-  const { loading, error, listings } = listingsState;
-  const navigate = useNavigate(); // Hook for navigation
-  const userInfo = JSON.parse(localStorage.getItem("userInfo"));
-  // State for the new listing form
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [price, setPrice] = useState("");
-  const [location, setlocation] = useState("");
-  const [availableDate, setavailableDate] = useState("");
-  const [duration, setDuration] = useState("");
-  const [sqft, setSqft] = useState("");
-  const [beds, setBeds] = useState("");
-  const [baths, setBaths] = useState("");
-  const [amenities, setAmenities] = useState({});
-
-  const [showModal, setShowModal] = useState(false);
-
-  const listingRedirect = (e) => {
-    navigate(`${e.target.name}/`);
-  };
-
-  const handleAmenities = (e) => {
-    const { name, value } = e.target;
-    setAmenities({
-      ...amenities,
-      [name]: !amenities[name],
+function ApartmentListings() {
+    const [inputs, setInputs] = useState({
+        BuildingName: '',
+        CompanyName: ''
     });
-  };
+    const [units, setUnits] = useState([]);
 
-  const handleToggleModal = () => {
-    setShowModal(!showModal);
-    setTitle("");
-    setDescription("");
-    setPrice("");
-    setlocation("");
-    setavailableDate("");
-    setDuration("");
-    setSqft("");
-    setBeds("");
-    setBaths("");
-    setAmenities({});
-  };
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setInputs(prev => ({ ...prev, [name]: value }));
+    };
 
-  useEffect(() => {
-    dispatch(fetchListings());
-  }, [dispatch, showModal]);
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const response = await axios.post('http://127.0.0.1:8000/listings/', {
+                BuildingName: inputs.BuildingName,
+                CompanyName: inputs.CompanyName
+            });
+            setUnits(response.data); // Assuming response data is the array of units
+        } catch (error) {
+            console.error('Error fetching apartment units:', error);
+            // Handle errors appropriately in a real app
+        }
+    };
 
-  // Handle form submission
-  const submitHandler = async (e) => {};
+    const handleViewDetails = (unitId) => {
+        // Placeholder for detail view functionality
+        console.log('View details for unit:', unitId);
+        // You can replace this with navigation or setting state to show details
+    };
 
-  return (
-    <div>
-      <div>
-        <Container>
-          <Row>
-            <Card
-              className="p-4 my-4"
-              style={{ borderRadius: "10px", border: "4px solid white" }}
-              bg="primary"
-            >
-              <h1 className="text-center text-light">Available Units</h1>
+    const styles = {
+        container: {
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            padding: '20px'
+        },
+        form: {
+            width: '100%',
+            maxWidth: '400px',
+            backgroundColor: '#f7f7f7',
+            padding: '20px',
+            boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+            borderRadius: '8px',
+            marginBottom: '20px'
+        },
+        inputGroup: {
+            marginBottom: '20px'
+        },
+        input: {
+            width: '100%',
+            padding: '10px',
+            border: '2px solid #ccc',
+            borderRadius: '4px'
+        },
+        button: {
+            width: '100%',
+            padding: '10px 20px',
+            backgroundColor: '#007bff',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer'
+        },
+        buttonHover: {
+            backgroundColor: '#0056b3'
+        },
+        results: {
+            width: '100%',
+            maxWidth: '400px'
+        },
+        unit: {
+            listStyle: 'none',
+            backgroundColor: '#fff',
+            padding: '15px',
+            marginBottom: '10px',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+            borderRadius: '8px'
+        },
+        detailButton: {
+            marginTop: '10px',
+            backgroundColor: '#4CAF50', // Green color for details button
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            padding: '8px 16px',
+            cursor: 'pointer'
+        }
+    };
 
-              {userInfo ? (
-                <Button
-                  style={{
-                    backgroundPosition: "center",
-                    display: "block",
-                    margin: "auto",
-                    borderRadius: "5px",
-                  }}
-                  onClick={handleToggleModal}
-                  className="btn btn-md btn-success"
-                >
-                  Create New Listing
-                </Button>
-              ) : (
-                <></>
-              )}
-              {loading ? (
-                <div>Loading...</div>
-              ) : error ? (
-                <div>Error: {error}</div>
-              ) : (
-                <Row>
-                  {listings.map((listing) => (
-                    <Col key={listing.id} sm={12} md={6} lg={4} xl={4}>
-                      <Card
-                        className="my-4"
-                        // bg="secondary"
-                        border="light"
-                        style={{
-                          color: "black",
-                          borderRadius: "10px",
-                          backgroundColor: "#f2f1e1",
-                        }}
-                      >
-                        <Card.Body>
-                          <Card.Title className="mt-3">
-                            {listing.title}
-                          </Card.Title>
-                          <Card.Text>
-                            <i className="fa-solid fa-location-dot"></i>
-                            &nbsp;{listing.location}
-                          </Card.Text>
+    return (
+        <div style={styles.container}>
+            <form onSubmit={handleSubmit} style={styles.form}>
+                <div style={styles.inputGroup}>
+                    <label>Building Name:</label>
+                    <input
+                        type="text"
+                        name="BuildingName"
+                        value={inputs.BuildingName}
+                        onChange={handleChange}
+                        required
+                        style={styles.input}
+                    />
+                </div>
+                <div style={styles.inputGroup}>
+                    <label>Company Name:</label>
+                    <input
+                        type="text"
+                        name="CompanyName"
+                        value={inputs.CompanyName}
+                        onChange={handleChange}
+                        required
+                        style={styles.input}
+                    />
+                </div>
+                <button type="submit" style={styles.button}
+                    onMouseOver={e => e.currentTarget.style.backgroundColor = styles.buttonHover.backgroundColor}
+                    onMouseOut={e => e.currentTarget.style.backgroundColor = styles.button.backgroundColor}>Submit</button>
+            </form>
 
-                          <Card.Text>
-                            <i className="fa-solid fa-dollar-sign"></i>
-                            &nbsp;{listing.price} per month
-                          </Card.Text>
-                          <Card.Text className="mt-0">
-                            <i className="fa-solid fa-ruler-combined"></i>
-                            &nbsp;{listing.sqft} sqft |&nbsp;
-                            <i className="fa-solid fa-bed"></i>
-                            &nbsp;{listing.bedrooms} beds |&nbsp;
-                            <i className="fa-solid fa-shower"></i>
-                            &nbsp;{listing.bathrooms} baths
-                          </Card.Text>
-                          <Button
-                            variant="info"
-                            style={{
-                              backgroundColor: "#9e0b00",
-                              borderRadius: "5px",
-                              backgroundPosition: "center",
-                              display: "block",
-                              margin: "auto",
-                            }}
-                            name={listing.created_at}
-                            onClick={listingRedirect}
-                          >
-                            View
-                          </Button>
-                        </Card.Body>
-                      </Card>
-                    </Col>
-                  ))}
-                </Row>
-              )}
-            </Card>
-          </Row>
-        </Container>
-      </div>
-    </div>
-  );
+            {units.length > 0 && (
+                <ul style={styles.results}>
+                    {units.map(unit => (
+                        <li key={unit.UnitRentID} style={styles.unit}>
+                            <div>Unit Number: {unit.unitNumber}</div>
+                            <div>Monthly Rent: ${unit.MonthlyRent}</div>
+                            <div>Square Footage: {unit.squareFootage} sqft</div>
+                            <div>Available Date: {unit.AvailableDateForMoveIn}</div>
+                            <button style={styles.detailButton} onClick={() => handleViewDetails(unit.UnitRentID)}>
+                                View Details
+                            </button>
+                        </li>
+                    ))}
+                </ul>
+            )}
+        </div>
+    );
 }
 
-export default ListingsScreen;
+export default ApartmentListings;
