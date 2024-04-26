@@ -28,5 +28,8 @@ urlpatterns = [
     path('login/',MyTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('main/', views.main, name='main'),
     path('main/sign-out-url', auth_views.LogoutView.as_view(next_page='homepage'), name='logout'),
-    path('pet/', PetView.as_view(), name='pet'),
+    path('<str:id>/getPets/',getPets, name='getPets'),
+    path('<str:id>/addPet/', addPet, name='addPet'),
+    path('<str:id>/editPet/', editPet, name='editPet'),
+    path('<str:id>/<str:petName>/<str:petType>/', deletePet, name='deletePet'),
 ]

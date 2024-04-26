@@ -9,6 +9,8 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes, parser_classes
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
+from django.contrib.auth import authenticate
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from .serializers import * 
 
 @api_view(['POST'])
@@ -77,12 +79,12 @@ def register(request):
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
+        
         data = super().validate(attrs)
         serializer=UserSerializerWithToken(self.user).data
         for k,v in serializer.items():
             data[k]=v
-
-        print(data)
+        authenticate(self.context['request']._request, username=attrs["username"], password=attrs["password"])
         return data
     
 class MyTokenObtainPairView(TokenObtainPairView):
@@ -99,3 +101,99 @@ def main(request):
 class PetView(CreateView):
     form_class = PetRegistrationForm
     template_name='pet.html'
+
+
+@api_view(['GET'])
+def getPets(request, id):
+    username=id
+
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT PetName, PetType, PetSize
+            FROM pets
+            WHERE username = %s
+            """, [username])
+
+        pets = cursor.fetchall()
+    
+    print(pets)
+    return Response({"pets": pets})
+
+
+@api_view(['POST'])
+# @permission_classes([IsAuthenticated])
+def addPet(request, id):
+    username=id
+    form = PetRegistrationForm({
+        "username": request.data.get('username'),
+        "petName": request.data.get('petName'),
+        "petType": request.data.get('petType'),
+        "petSize": request.data.get('petSize'),
+    })
+
+    print(form.errors)
+
+    if form.is_valid():
+        username = request.data.get('username')
+        petName = request.data.get('petName')
+        petType = request.data.get('petType')
+        petSize = request.data.get('petSize')
+
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                INSERT INTO pets (PetName, PetType, PetSize, username)
+                VALUES (%s, %s, %s, %s)
+                """, [petName, petType, petSize, username])
+
+            pets = cursor.fetchall()
+    
+    return Response({"pets": pets})
+
+
+@api_view(['POST'])
+# @permission_classes([IsAuthenticated])
+def editPet(request, id):
+    username=id
+    form = PetRegistrationForm({
+        "username": request.data.get('username'),
+        "petName": request.data.get('petName'),
+        "petType": request.data.get('petType'),
+        "petSize": request.data.get('petSize'),
+    })
+    print(request.data)
+    print(form.errors)
+
+    if form.is_valid():
+        username = request.data.get('username')
+        petName = request.data.get('petName')
+        petType = request.data.get('petType')
+        petSize = request.data.get('petSize')
+        oldPetName = request.data.get('oldPetName')
+        oldPetType = request.data.get('oldPetType')
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                UPDATE pets
+                SET PetName = %s, PetType = %s, PetSize = %s
+                WHERE username = %s AND PetName = %s AND PetType = %s
+                """, [petName, petType, petSize, username, oldPetName, oldPetType])
+
+
+    
+    return Response({"message": "Pet successfully updated."})
+
+
+@api_view(['DELETE'])
+# @permission_classes([IsAuthenticated])
+def deletePet(request, id, petName, petType):
+    print(request)
+    username = id
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            DELETE
+            FROM pets
+            WHERE username = %s AND PetName = %s AND PetType = %s
+            """, [username, petName, petType])
+
+
+    
+    return Response({"message": "Pet successfully deleted."})

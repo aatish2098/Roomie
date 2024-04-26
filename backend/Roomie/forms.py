@@ -35,11 +35,10 @@ class RegistrationForm(forms.ModelForm):
             raise forms.ValidationError('A user with that username already exists.')
         return username
 
-class PetRegistrationForm(forms.ModelForm):
+class PetRegistrationForm(forms.Form):
 
     class Meta:
-        model = Pet
-        fields = ['petName', 'petType', 'petSize']
+        fields = ["username", 'petName', 'petType', 'petSize']
         petTypes = [
             ("null",""),
             ('bird', 'Bird'),
@@ -50,6 +49,8 @@ class PetRegistrationForm(forms.ModelForm):
             ('hamster', 'Hamster'),
             ('rabbit', 'Rabbit'),
             ('reptile', 'Reptile'),
+            ('turtle', 'Turtle'),
+            ('rodent', 'Rodent')
         ]
 
         petSizes = [
@@ -60,7 +61,8 @@ class PetRegistrationForm(forms.ModelForm):
         ]
 
         widgets = {
+            'username': forms.TextInput(attrs={'class': 'form-control'}),
             'petName': forms.TextInput(attrs={'class': 'form-control'}),
             'petType': forms.Select(choices=petTypes, attrs={'class': 'form-control'}),
-            'petSize': forms.Select(choices=petSizes, attrs={'class': 'form-control'}),
+            'petSize': forms.Select(choices=petSizes, attrs={'class': 'form-control'})
         }
