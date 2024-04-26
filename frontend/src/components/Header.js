@@ -60,68 +60,73 @@ function Header() {
                   <Nav.Link className="nav-link">Listings</Nav.Link>
                 </LinkContainer>
               </li>
-                <li className="nav-item">
-              <LinkContainer to="/budgeting">
-                <Nav.Link className="nav-link">Budgeting</Nav.Link>
-              </LinkContainer>
-            </li>
+              <li className="nav-item">
+                <LinkContainer to="/budgeting">
+                  <Nav.Link className="nav-link">Budgeting</Nav.Link>
+                </LinkContainer>
+              </li>
               {/* <li className="nav-item">
                 <LinkContainer to="/about">
                   <Nav.Link className="nav-link">About </Nav.Link>
                 </LinkContainer>
               </li> */}
               {userInfo ? (
-                <li className="nav-item dropdown">
-                  <LinkContainer to="/">
-                    <Nav.Link
-                      className="nav-link dropdown-toggle"
-                      data-bs-toggle="dropdown"
-                      role="button"
-                      aria-haspopup="true"
-                      aria-expanded="false"
-                    >
+                  <li className="nav-item dropdown">
+                    <LinkContainer to="/">
+                      <Nav.Link
+                          className="nav-link dropdown-toggle"
+                          data-bs-toggle="dropdown"
+                          role="button"
+                          aria-haspopup="true"
+                          aria-expanded="false"
+                      >
                       <span>
                         <i className="fa-solid fa-user"></i>
                       </span>
-                      &nbsp; {userInfo.name || userInfoCache.username}
-                    </Nav.Link>
-                  </LinkContainer>
-                  <div className="dropdown-menu">
-                    <LinkContainer to={`/profile/${userInfoCache.username}`}>
-                      <Nav.Link className="dropdown-item">Profile</Nav.Link>
+                        &nbsp; {userInfo.name || userInfoCache.username}
+                      </Nav.Link>
                     </LinkContainer>
-                    <LinkContainer to="/settings">
-                      <Nav.Link className="dropdown-item">Settings</Nav.Link>
-                    </LinkContainer>
-                    <div className="dropdown-divider"></div>
-                    <Nav.Link className="dropdown-item" onClick={logoutHandler}>
-                      Log Out
-                    </Nav.Link>
-                  </div>
-                </li>
+                    <div className="dropdown-menu">
+                      <LinkContainer to={`/profile/${userInfoCache.username}`}>
+                        <Nav.Link className="dropdown-item">Profile</Nav.Link>
+                      </LinkContainer>
+                      <LinkContainer to="/settings">
+                        <Nav.Link className="dropdown-item">Settings</Nav.Link>
+                      </LinkContainer>
+                      <div className="dropdown-divider"></div>
+                      <Nav.Link className="dropdown-item" onClick={logoutHandler}>
+                        Log Out
+                      </Nav.Link>
+                    </div>
+                  </li>
               ) : (
-                <li className="nav-item dropdown">
-                  <LinkContainer to="/account">
-                    <Nav.Link
-                      className="nav-link dropdown-toggle"
-                      data-bs-toggle="dropdown"
-                      role="button"
-                      aria-haspopup="true"
-                      aria-expanded="false"
-                    >
-                      Account
-                    </Nav.Link>
-                  </LinkContainer>
-                  <div className="dropdown-menu">
-                    <LinkContainer to="/login">
-                      <Nav.Link className="dropdown-item">Log In</Nav.Link>
+                  <li className="nav-item dropdown">
+                    <LinkContainer to="/account">
+                      <Nav.Link
+                          className="nav-link dropdown-toggle"
+                          data-bs-toggle="dropdown"
+                          role="button"
+                          aria-haspopup="true"
+                          aria-expanded="false"
+                      >
+                        Account
+                      </Nav.Link>
                     </LinkContainer>
-                    <LinkContainer to="/signup">
-                      <Nav.Link className="dropdown-item">Sign Up</Nav.Link>
-                    </LinkContainer>
-                  </div>
-                </li>
+                    <div className="dropdown-menu">
+                      <LinkContainer to="/login">
+                        <Nav.Link className="dropdown-item">Log In</Nav.Link>
+                      </LinkContainer>
+                      <LinkContainer to="/signup">
+                        <Nav.Link className="dropdown-item">Sign Up</Nav.Link>
+                      </LinkContainer>
+                    </div>
+                  </li>
               )}
+              <li className="nav-item">
+                <LinkContainer to="/advanced-search">
+                  <Nav.Link className="nav-link">Advanced Search</Nav.Link>
+                </LinkContainer>
+              </li>
             </ul>
             {/* <form className="d-flex">
               <input

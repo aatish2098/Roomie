@@ -37,5 +37,5 @@ urlpatterns = [
     path('<str:id>/<str:petName>/<str:petType>/', deletePet, name='deletePet'),
     path('budgeting/', budgeting_view, name='budgeting_api'),
     path('listings/', listing_view, name='apartment_units'),
-
+    path('advanced-search/', advanced_search, name='advanced_search'),
 ]

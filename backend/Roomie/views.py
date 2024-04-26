@@ -270,3 +270,67 @@ def listing_view(request):
         return JsonResponse({'error': 'Invalid JSON'}, status=400)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
+@csrf_exempt  # Use this decorator to exempt this view from CSRF verification.
+@require_http_methods(["POST"])
+def advanced_search(request):
+    # MonthlyRent, AvailableDateForMoveIn from apartmentunit
+    # AddrCity, AddrState from apartmentbuilding
+    # aType from amenities
+    # aType from amenitiesin
+
+    # Extract parameters from request
+    min_rent = request.GET.get('min_rent')
+    max_rent = request.GET.get('max_rent')
+    in_door_washing_machine = request.GET.get('in_door_washing_machine') == 'true'
+    gym = request.GET.get('gym') == 'true'
+    city = request.GET.get('city')
+    state = request.GET.get('state')
+
+    # Start building the SQL query
+    query = """
+        SELECT u.MonthlyRent, u.AvailableDateForMoveIn, b.AddrCity, b.AddrState, a.aType
+        FROM apartmentunit u
+        INNER JOIN apartmentbuilding b ON u.BuildingID = b.BuildingID
+        LEFT JOIN amenitiesin ai ON u.UnitID = ai.UnitID
+        LEFT JOIN amenities a ON ai.AmenityID = a.AmenityID
+        WHERE 1=1
+        """
+    params = []
+
+    # Filter by monthly rent
+    if min_rent:
+        query += " AND u.MonthlyRent >= %s"
+        params.append(min_rent)
+    if max_rent:
+        query += " AND u.MonthlyRent <= %s"
+        params.append(max_rent)
+
+    # Filter by city and state
+    if city:
+        query += " AND b.AddrCity = %s"
+        params.append(city)
+    if state:
+        query += " AND b.AddrState = %s"
+        params.append(state)
+
+    # Filter by amenities
+    amenity_conditions = []
+    if in_door_washing_machine:
+        amenity_conditions.append(" a.aType = 'In-door Washing Machine'")
+    if gym:
+        amenity_conditions.append(" a.aType = 'Gym'")
+    if amenity_conditions:
+        query += " AND (" + " OR ".join(amenity_conditions) + ")"
+
+    # Execute the query safely
+    with connection.cursor() as cursor:
+        cursor.execute(query, params)
+        columns = [col[0] for col in cursor.description]
+        data = [
+            dict(zip(columns, row))
+            for row in cursor.fetchall()
+        ]
+
+    return JsonResponse(data, safe=False)
+

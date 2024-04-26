@@ -10,6 +10,7 @@ import ListingsScreen from "./screens/ListingsScreen";
 import SettingsScreen from "./screens/SettingsScreen";
 import UserProfileScreen from "./screens/UserProfileScreen";
 import ViewListingScreen from "./screens/ViewListingScreen";
+import AdvancedSearchScreen from './screens/AdvancedSearchScreen';
 
 export default function App() {
   return (
@@ -29,6 +30,7 @@ export default function App() {
           <Route exact path="/budgeting" element={<Budgeting />} />
           <Route exact path="/login" element={<LoginScreen />}></Route>
           <Route path="/profile/:id" element={<UserProfileScreen />} />
+          <Route exact path="/advanced-search" element={<AdvancedSearchScreen />}></Route>
         </Routes>
       </Router>
     </div>

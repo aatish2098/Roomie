@@ -20,17 +20,14 @@ function ApartmentListings() {
                 BuildingName: inputs.BuildingName,
                 CompanyName: inputs.CompanyName
             });
-            setUnits(response.data); // Assuming response data is the array of units
+            setUnits(response.data);
         } catch (error) {
             console.error('Error fetching apartment units:', error);
-            // Handle errors appropriately in a real app
         }
     };
 
     const handleViewDetails = (unitId) => {
-        // Placeholder for detail view functionality
         console.log('View details for unit:', unitId);
-        // You can replace this with navigation or setting state to show details
     };
 
     const styles = {
