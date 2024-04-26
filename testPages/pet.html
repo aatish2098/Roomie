@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Pet Registration</title>
+    <!-- {% load static %} -->
+    <!-- <link rel="stylesheet" href="{% static 'css/style.css' %}" /> -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="title">Pet Registration Form</div>
+      <div class="content">
+        <form action="#">
+          <div class="user-details">
+            <div class="input-box">
+              <span class="details">Pet Name</span>
+              <input type="text" placeholder="Enter your pet's name" required />
+            </div>
+            <div class="dropdown">
+              <label for="petType">Pet Type:</label>
+              <select id="petType" name="petType">
+                <option value="" disabled selected hidden>Choose...</option>
+                <option value="bird">Bird</option>
+                <option value="cat">Cat</option>
+                <option value="dog">Dog</option>
+                <option value="frog">Frog</option>
+                <option value="guinea_pig">Guinea Pig</option>
+                <option value="hamster">Hamster</option>
+                <option value="rabbit">Rabbit</option>
+                <option value="reptile">Reptile</option>
+              </select>
+              </div>
+            </div>
+            <div class="dropdown">
+              <label for="petSize">Pet Size:</label>
+              <select id="petSize" name="petSize">
+                <option value="" disabled selected hidden>Choose...</option>
+                <option value="small">Small</option>
+                <option value="medium">Medium</option>
+                <option value="large">Large</option>
+              </select>
+              </div>
+            </div>
+          <div class="button">
+            <input type="submit" value="Register" />
+          </div>
+        </form>
+      </div>
+    </div>
+  </body>
+</html>
