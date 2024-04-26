@@ -29,4 +29,5 @@ urlpatterns = [
     path('main/', views.main, name='main'),
     path('main/sign-out-url', auth_views.LogoutView.as_view(next_page='homepage'), name='logout'),
     path('pet/', PetView.as_view(), name='pet'),
+    path('budgeting/', budgeting_view, name='budgeting_api'),
 ]
