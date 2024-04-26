@@ -8,12 +8,18 @@ import {
   USER_SIGNUP_SUCCESS,
   USER_SIGNUP_FAIL,
   USER_LOGOUT,
-  USER_UPDATE_PROFILE_REQUEST,
-  USER_UPDATE_PROFILE_SUCCESS,
-  USER_UPDATE_PROFILE_FAIL,
-  USER_GET_PROFILE_REQUEST,
-  USER_GET_PROFILE_SUCCESS,
-  USER_GET_PROFILE_FAIL,
+  USER_GET_PETS_REQUEST,
+  USER_GET_PETS_SUCCESS,
+  USER_GET_PETS_FAIL,
+  USER_ADD_PET_REQUEST,
+  USER_ADD_PET_SUCCESS,
+  USER_ADD_PET_FAIL,
+  USER_EDIT_PET_REQUEST,
+  USER_EDIT_PET_SUCCESS,
+  USER_EDIT_PET_FAIL,
+  USER_DELETE_PET_REQUEST,
+  USER_DELETE_PET_SUCCESS,
+  USER_DELETE_PET_FAIL,
 } from "../constants/userConstants";
 
 // axios.defaults.headers.post["Access-Control-Allow-Origin"] = "*";
@@ -106,20 +112,23 @@ export const logout = () => (dispatch) => {
   dispatch({ type: USER_LOGOUT });
 };
 
-export const getProfile = (username) => async (dispatch) => {
+export const getPets = (username) => async (dispatch) => {
   try {
     dispatch({
-      type: USER_GET_PROFILE_REQUEST,
+      type: USER_GET_PETS_REQUEST,
     });
-    const { data } = await axios.get(`/api/users/profile/display/${username}/`);
+
+    const { data } = await axios.get(
+      `http://127.0.0.1:8000/${username}/getPets`
+    );
 
     dispatch({
-      type: USER_GET_PROFILE_SUCCESS,
+      type: USER_GET_PETS_SUCCESS,
       payload: data,
     });
   } catch (error) {
     dispatch({
-      type: USER_GET_PROFILE_FAIL,
+      type: USER_GET_PETS_FAIL,
       payload:
         error.response && error.response.data.detail
           ? error.response.data.detail
@@ -128,78 +137,85 @@ export const getProfile = (username) => async (dispatch) => {
   }
 };
 
+export const addPet =
+  (username, petName, petType, petSize) => async (dispatch) => {
+    try {
+      dispatch({
+        type: USER_ADD_PET_REQUEST,
+      });
+
+      const config = {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      };
+      console.log(username, petName, petType, petSize);
+      const { data } = await axios.post(
+        `http://127.0.0.1:8000/${username}/addPet/`,
+        {
+          username: username,
+          petName: petName,
+          petType: petType,
+          petSize: petSize,
+        },
+        config
+      );
+
+      dispatch({
+        type: USER_ADD_PET_SUCCESS,
+        payload: data,
+      });
+    } catch (error) {
+      dispatch({
+        type: USER_ADD_PET_FAIL,
+        payload:
+          error.response && error.response.data.detail
+            ? error.response.data.detail
+            : error.message,
+      });
+    }
+  };
+
 // Implement the updateProfile action
-export const updateProfile =
-  (
-    username,
-    fname,
-    lname,
-    bio,
-    age,
-    gender,
-    school,
-    pets,
-    allergies,
-    budget,
-    sleep_schedule,
-    profile_picture
-  ) =>
+export const editPet =
+  (username, petName, petType, petSize, oldPetName, oldPetType) =>
   async (dispatch) => {
     try {
       dispatch({
-        type: USER_UPDATE_PROFILE_REQUEST,
+        type: USER_EDIT_PET_REQUEST,
       });
       // const {
       //   userLogin: { userInfo },
       // } = getState(); // Assuming you store logged-in user info in state
-      console.log([
-        username,
-        fname,
-        lname,
-        bio,
-        age,
-        gender,
-        school,
-        pets,
-        allergies,
-        budget,
-        sleep_schedule,
-        profile_picture,
-      ]);
+      console.log([username, petName, petType, petSize]);
       const config = {
         headers: {
           "Content-Type": "multipart/form-data",
           // Authorization: `Bearer ${userInfo.token}`, // Assuming your backend uses token-based auth
         },
       };
-
+      console.log(username, petName, petType, petSize, oldPetName, oldPetType);
       const { data } = await axios.post(
-        "/api/users/profile/update/",
+        `http://127.0.0.1:8000/${username}/editPet/`,
         {
-          user: username,
-          first_name: fname,
-          last_name: lname,
-          bio: bio,
-          age: age,
-          gender: gender,
-          school: school,
-          pets: pets,
-          allergies: allergies,
-          budget: budget,
-          sleep_schedule: sleep_schedule,
-          profile_picture: profile_picture,
+          username: username,
+          petName: petName,
+          petType: petType,
+          petSize: petSize,
+          oldPetName: oldPetName,
+          oldPetType: oldPetType,
         },
         config
       );
       dispatch({
-        type: USER_UPDATE_PROFILE_SUCCESS,
+        type: USER_EDIT_PET_SUCCESS,
         payload: data,
       });
 
       // Optionally update user info in local state if profile update affects user info
     } catch (error) {
       dispatch({
-        type: USER_UPDATE_PROFILE_FAIL,
+        type: USER_EDIT_PET_FAIL,
         payload:
           error.response && error.response.data.message
             ? error.response.data.message
@@ -207,3 +223,28 @@ export const updateProfile =
       });
     }
   };
+
+export const deletePet = (username, petName, petType) => async (dispatch) => {
+  try {
+    dispatch({ type: USER_DELETE_PET_REQUEST });
+    console.log(username);
+    console.log(petName);
+    console.log(petType);
+    const { data } = await axios.delete(
+      `http://127.0.0.1:8000/${username}/${petName}/${petType}/`
+    );
+
+    dispatch({
+      type: USER_DELETE_PET_SUCCESS,
+      payload: data,
+    });
+  } catch (error) {
+    dispatch({
+      type: USER_DELETE_PET_FAIL,
+      payload:
+        error.response && error.response.data.message
+          ? error.response.data.message
+          : error.message,
+    });
+  }
+};

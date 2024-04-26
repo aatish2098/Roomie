@@ -6,7 +6,8 @@ import {
   userLoginReducers,
   userSignupReducers,
   userSettingsReducers,
-  userProfileReducers,
+  userGetPetsReducers,
+  userAddPetReducers,
 } from "../reducers/userReducers";
 import {
   listingsViewReducer,
@@ -18,8 +19,8 @@ import {
 const reducer = combineReducers({
   userLogin: userLoginReducers,
   userSignup: userSignupReducers,
-  userSettings: userSettingsReducers,
-  userProfile: userProfileReducers,
+  userPets: userGetPetsReducers,
+  userAddPet: userAddPetReducers,
   listingsView: listingsViewReducer,
   listingView: listingViewReducer,
   listingsCreate: listingsCreateReducer,
