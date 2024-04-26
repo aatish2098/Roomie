@@ -6,12 +6,15 @@ import {
   USER_SIGNUP_SUCCESS,
   USER_SIGNUP_FAIL,
   USER_LOGOUT,
-  USER_UPDATE_PROFILE_REQUEST,
-  USER_UPDATE_PROFILE_SUCCESS,
-  USER_UPDATE_PROFILE_FAIL,
-  USER_GET_PROFILE_REQUEST,
-  USER_GET_PROFILE_SUCCESS,
-  USER_GET_PROFILE_FAIL,
+  USER_GET_PETS_REQUEST,
+  USER_GET_PETS_SUCCESS,
+  USER_GET_PETS_FAIL,
+  USER_ADD_PET_REQUEST,
+  USER_ADD_PET_SUCCESS,
+  USER_ADD_PET_FAIL,
+  USER_DELETE_PET_REQUEST,
+  USER_DELETE_PET_SUCCESS,
+  USER_DELETE_PET_FAIL,
 } from "../constants/userConstants";
 
 export const userSignupReducers = (state = {}, action) => {
@@ -43,26 +46,42 @@ export const userLoginReducers = (state = {}, action) => {
   }
 };
 
-export const userSettingsReducers = (state = {}, action) => {
+export const userGetPetsReducers = (state = { pets: [] }, action) => {
   switch (action.type) {
-    case USER_UPDATE_PROFILE_REQUEST:
-      return { loading: true };
-    case USER_UPDATE_PROFILE_SUCCESS:
-      return { loading: false, userProfile: action.payload };
-    case USER_UPDATE_PROFILE_FAIL:
+    case USER_GET_PETS_REQUEST:
+      return { loading: true, ...state };
+    case USER_GET_PETS_SUCCESS:
+      return { loading: false, pets: action.payload };
+    case USER_GET_PETS_FAIL:
       return { loading: false, error: action.payload };
     default:
       return state;
   }
 };
 
-export const userProfileReducers = (state = { profile: [] }, action) => {
+export const userAddPetReducers = (state = {}, action) => {
   switch (action.type) {
-    case USER_GET_PROFILE_REQUEST:
+    case USER_ADD_PET_REQUEST:
       return { loading: true, ...state };
-    case USER_GET_PROFILE_SUCCESS:
-      return { loading: false, profile: action.payload };
-    case USER_GET_PROFILE_FAIL:
+    case USER_ADD_PET_SUCCESS:
+      return { loading: false, pet: action.payload };
+    case USER_ADD_PET_FAIL:
+      return { loading: false, error: action.payload };
+    default:
+      return state;
+  }
+};
+
+export const userDeletePetReducer = (state = { pets: [] }, action) => {
+  switch (action.type) {
+    case USER_DELETE_PET_REQUEST:
+      return { loading: true, ...state };
+    case USER_DELETE_PET_SUCCESS:
+      return {
+        loading: false,
+        pets: action.payload,
+      };
+    case USER_ADD_PET_FAIL:
       return { loading: false, error: action.payload };
     default:
       return state;

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Pet Registration</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="title">Pet Registration Form</div>
+      <div class="content">
+        <form action="#" method="post">
+          {% csrf_token %} {{ form.as_p }}
+          <input type="submit" />
+        </form>
+      </div>
+    </div>
+  </body>
+</html>

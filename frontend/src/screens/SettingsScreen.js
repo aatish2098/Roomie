@@ -9,9 +9,9 @@ import {
   Spinner,
 } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
-import { updateProfile } from "../actions/userActions";
+// import { updateProfile } from "../actions/userActions";
 import { useNavigate } from "react-router-dom";
-import { getProfile } from "../actions/userActions";
+// import { getProfile } from "../actions/userActions";
 
 function SettingsScreen() {
   // const [profilePicture, setProfilePicture] = useState("");
@@ -35,7 +35,7 @@ function SettingsScreen() {
     if (!localStorage.getItem("userInfo")) {
       navigate("/login");
     }
-    dispatch(getProfile(userInfo.username));
+    // dispatch(getProfile(userInfo.username));
     if (profile) {
       setAge(profile.age);
       setAllergies(profile.allergies);
@@ -57,22 +57,22 @@ function SettingsScreen() {
     const lname = name[1];
     // Dispatch action to update user profile
     // console.log(pfp);
-    await dispatch(
-      updateProfile(
-        userInfo.username,
-        fname,
-        lname,
-        bio,
-        age,
-        gender,
-        school,
-        pets,
-        allergies,
-        budget,
-        sleepSchedule,
-        pfp
-      )
-    );
+    // await dispatch(
+    //   updateProfile(
+    //     userInfo.username,
+    //     fname,
+    //     lname,
+    //     bio,
+    //     age,
+    //     gender,
+    //     school,
+    //     pets,
+    //     allergies,
+    //     budget,
+    //     sleepSchedule,
+    //     pfp
+    //   )
+    // );
     console.log(
       // (userInfo.username,
       [

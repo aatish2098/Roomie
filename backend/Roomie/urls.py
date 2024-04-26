@@ -17,6 +17,9 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from django.contrib.auth import views as auth_views
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+)
 
 from Roomie import views
 from Roomie.views import *
@@ -28,6 +31,10 @@ urlpatterns = [
     path('login/',MyTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('main/', views.main, name='main'),
     path('main/sign-out-url', auth_views.LogoutView.as_view(next_page='homepage'), name='logout'),
-    path('pet/', PetView.as_view(), name='pet'),
-    path('budgeting/', budgeting_view, name='budgeting_api'),
+    path('<str:id>/getPets/',getPets, name='getPets'),
+    path('<str:id>/addPet/', addPet, name='addPet'),
+    path('<str:id>/editPet/', editPet, name='editPet'),
+    path('<str:id>/<str:petName>/<str:petType>/', deletePet, name='deletePet'),
+  path('budgeting/', budgeting_view, name='budgeting_api'),
+
 ]
