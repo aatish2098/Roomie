@@ -274,63 +274,70 @@ def listing_view(request):
 @csrf_exempt  # Use this decorator to exempt this view from CSRF verification.
 @require_http_methods(["POST"])
 def advanced_search(request):
-    # MonthlyRent, AvailableDateForMoveIn from apartmentunit
-    # AddrCity, AddrState from apartmentbuilding
-    # aType from amenities
-    # aType from amenitiesin
-
-    # Extract parameters from request
-    min_rent = request.GET.get('min_rent')
-    max_rent = request.GET.get('max_rent')
-    in_door_washing_machine = request.GET.get('in_door_washing_machine') == 'true'
-    gym = request.GET.get('gym') == 'true'
+    min_rent = request.GET.get('minRent')
+    max_rent = request.GET.get('maxRent')
     city = request.GET.get('city')
     state = request.GET.get('state')
+    earliest_available_date_for_move_in  = request.GET.get('earliestAvailableDateForMoveIn')
+    latest_available_date_for_move_in = request.GET.get('latestAvailableDateForMoveIn')
+    amenities = [
+        ('Cat Cafe', request.GET.get('catCafe')),
+        ('Central AC', request.GET.get('centralAC')),
+        ('Coffee Machine', request.GET.get('coffeeMachine')),
+        ('Delivery Room', request.GET.get('deliveryRoom')),
+        ('Dishwasher', request.GET.get('dishwasher')),
+        ('Dryer', request.GET.get('dryer')),
+        ('Game Room', request.GET.get('gameRoom')),
+        ('Garden', request.GET.get('garden')),
+        ('Gas Stove', request.GET.get('gasStove')),
+        ('Gym', request.GET.get('gym')),
+        ('Induction Cooker', request.GET.get('inductionCooker')),
+        ('Parking', request.GET.get('parking')),
+        ('Public Washing Machine', request.GET.get('publicWashingMachine')),
+        ('Rooftop', request.GET.get('rooftop')),
+        ('Swimming Pool', request.GET.get('swimmingPool')),
+        ('Tech Lounge', request.GET.get('techLounge')),
+        ('Washing Machine', request.GET.get('washingMachine')),
+        ('Waste Shredder', request.GET.get('wasteShredder'))
+    ]
+
+    checked_amenities = [amenity for amenity, value in amenities if value == 'True']
+    amenities_count = len(checked_amenities)
+    amenities_placeholders = ', '.join(['%s'] * len(checked_amenities))
+
+    print(checked_amenities)
+    print(amenities_count)
+    print(amenities_placeholders)
 
     # Start building the SQL query
-    query = """
-        SELECT u.MonthlyRent, u.AvailableDateForMoveIn, b.AddrCity, b.AddrState, a.aType
-        FROM apartmentunit u
-        INNER JOIN apartmentbuilding b ON u.BuildingID = b.BuildingID
-        LEFT JOIN amenitiesin ai ON u.UnitID = ai.UnitID
-        LEFT JOIN amenities a ON ai.AmenityID = a.AmenityID
-        WHERE 1=1
+    query = f"""
+        SELECT DISTINCT au.UnitRentID, au.unitNumber, au.MonthlyRent, au.squareFootage, au.AvailableDateForMoveIn
+        FROM ApartmentUnit au
+        JOIN ApartmentBuilding ab ON au.CompanyName = ab.CompanyName AND au.BuildingName = ab.BuildingName
+        WHERE au.MonthlyRent BETWEEN %s AND %s
+          AND ab.AddrCity = %s AND ab.AddrState = %s
+          AND au.AvailableDateForMoveIn BETWEEN %s AND %s
+        AND au.UnitRentID IN (
+            SELECT ai.UnitRentID
+            FROM AmenitiesIn ai
+            WHERE ai.aType IN ({amenities_placeholders})
+            GROUP BY ai.UnitRentID
+            HAVING COUNT(DISTINCT ai.aType) = %s
+        )
         """
-    params = []
+    params = [min_rent, max_rent, city, state, earliest_available_date_for_move_in, latest_available_date_for_move_in, *checked_amenities, amenities_count]
 
-    # Filter by monthly rent
-    if min_rent:
-        query += " AND u.MonthlyRent >= %s"
-        params.append(min_rent)
-    if max_rent:
-        query += " AND u.MonthlyRent <= %s"
-        params.append(max_rent)
-
-    # Filter by city and state
-    if city:
-        query += " AND b.AddrCity = %s"
-        params.append(city)
-    if state:
-        query += " AND b.AddrState = %s"
-        params.append(state)
-
-    # Filter by amenities
-    amenity_conditions = []
-    if in_door_washing_machine:
-        amenity_conditions.append(" a.aType = 'In-door Washing Machine'")
-    if gym:
-        amenity_conditions.append(" a.aType = 'Gym'")
-    if amenity_conditions:
-        query += " AND (" + " OR ".join(amenity_conditions) + ")"
+    print(query)
+    print(params)
 
     # Execute the query safely
     with connection.cursor() as cursor:
         cursor.execute(query, params)
         columns = [col[0] for col in cursor.description]
-        data = [
+        results = [
             dict(zip(columns, row))
             for row in cursor.fetchall()
         ]
 
-    return JsonResponse(data, safe=False)
+    return JsonResponse(results, safe=False)
 
