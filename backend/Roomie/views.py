@@ -274,70 +274,149 @@ def listing_view(request):
 @csrf_exempt  # Use this decorator to exempt this view from CSRF verification.
 @require_http_methods(["POST"])
 def advanced_search(request):
-    min_rent = request.GET.get('minRent')
-    max_rent = request.GET.get('maxRent')
-    city = request.GET.get('city')
-    state = request.GET.get('state')
-    earliest_available_date_for_move_in  = request.GET.get('earliestAvailableDateForMoveIn')
-    latest_available_date_for_move_in = request.GET.get('latestAvailableDateForMoveIn')
-    amenities = [
-        ('Cat Cafe', request.GET.get('catCafe')),
-        ('Central AC', request.GET.get('centralAC')),
-        ('Coffee Machine', request.GET.get('coffeeMachine')),
-        ('Delivery Room', request.GET.get('deliveryRoom')),
-        ('Dishwasher', request.GET.get('dishwasher')),
-        ('Dryer', request.GET.get('dryer')),
-        ('Game Room', request.GET.get('gameRoom')),
-        ('Garden', request.GET.get('garden')),
-        ('Gas Stove', request.GET.get('gasStove')),
-        ('Gym', request.GET.get('gym')),
-        ('Induction Cooker', request.GET.get('inductionCooker')),
-        ('Parking', request.GET.get('parking')),
-        ('Public Washing Machine', request.GET.get('publicWashingMachine')),
-        ('Rooftop', request.GET.get('rooftop')),
-        ('Swimming Pool', request.GET.get('swimmingPool')),
-        ('Tech Lounge', request.GET.get('techLounge')),
-        ('Washing Machine', request.GET.get('washingMachine')),
-        ('Waste Shredder', request.GET.get('wasteShredder'))
+    data = json.loads(request.body.decode('utf-8'))
+    appliance_keys = [
+        'CentralAC', 'DishWasher', 'Dryer', 'GasStove',
+        'InductionCooker', 'WashingMachine', 'WasteShredder'
     ]
 
-    checked_amenities = [amenity for amenity, value in amenities if value == 'True']
-    amenities_count = len(checked_amenities)
-    amenities_placeholders = ', '.join(['%s'] * len(checked_amenities))
 
-    print(checked_amenities)
-    print(amenities_count)
-    print(amenities_placeholders)
+    UnitAmenities = []
+    BuildingAmenities = []
 
-    # Start building the SQL query
-    query = f"""
-        SELECT DISTINCT au.UnitRentID, au.unitNumber, au.MonthlyRent, au.squareFootage, au.AvailableDateForMoveIn
-        FROM ApartmentUnit au
-        JOIN ApartmentBuilding ab ON au.CompanyName = ab.CompanyName AND au.BuildingName = ab.BuildingName
-        WHERE au.MonthlyRent BETWEEN %s AND %s
-          AND ab.AddrCity = %s AND ab.AddrState = %s
-          AND au.AvailableDateForMoveIn BETWEEN %s AND %s
-        AND au.UnitRentID IN (
-            SELECT ai.UnitRentID
-            FROM AmenitiesIn ai
-            WHERE ai.aType IN ({amenities_placeholders})
+    for key, value in data.items():
+        if value is True:  # Check if the value is True
+            if key in appliance_keys:
+                UnitAmenities.append(key)
+            else:
+                BuildingAmenities.append(key)
+
+
+    if not UnitAmenities and not BuildingAmenities:
+        query = """SELECT
+            au.UnitRentID,
+            au.unitNumber,
+            au.MonthlyRent,
+            au.squareFootage,
+            au.AvailableDateForMoveIn
+        FROM
+            ApartmentUnit au
+        JOIN
+            ApartmentBuilding ab ON au.CompanyName = ab.CompanyName AND au.BuildingName = ab.BuildingName
+        WHERE
+            au.MonthlyRent BETWEEN %s AND %s
+            AND ab.AddrCity = %s
+            AND ab.AddrState = %s
+            AND au.AvailableDateForMoveIn >= %s"""
+        with connection.cursor() as cursor:
+            cursor.execute(query,
+                           [data['minRent'], data['maxRent'], data['city'], data['state'],
+                            data['AvailableDateForMoveIn']])
+            rows = cursor.fetchall()
+    elif UnitAmenities and BuildingAmenities:
+        unitamlength=len(UnitAmenities)
+        buildingamlength=len(BuildingAmenities)
+        query = """SELECT
+        au.UnitRentID,
+        au.unitNumber,
+        au.MonthlyRent,
+        au.squareFootage,
+        au.AvailableDateForMoveIn
+    FROM
+        ApartmentUnit au
+    JOIN
+        ApartmentBuilding ab ON au.CompanyName = ab.CompanyName AND au.BuildingName = ab.BuildingName
+    WHERE
+        au.MonthlyRent BETWEEN %s AND %s
+        AND ab.AddrCity = %s
+        AND ab.AddrState = %s
+        AND au.AvailableDateForMoveIn >= %s
+        AND EXISTS (
+            SELECT 1 FROM AmenitiesIn ai 
+            WHERE ai.UnitRentID = au.UnitRentID AND ai.aType IN %s
             GROUP BY ai.UnitRentID
             HAVING COUNT(DISTINCT ai.aType) = %s
         )
+        AND EXISTS (
+            SELECT 1 FROM Provides p
+            WHERE p.CompanyName = ab.CompanyName AND p.BuildingName = ab.BuildingName AND p.aType IN %s
+            GROUP BY p.CompanyName, p.BuildingName
+            HAVING COUNT(DISTINCT p.aType) = %s
+        )
         """
-    params = [min_rent, max_rent, city, state, earliest_available_date_for_move_in, latest_available_date_for_move_in, *checked_amenities, amenities_count]
+        with connection.cursor() as cursor:
+            cursor.execute(query,
+                           [data['minRent'], data['maxRent'], data['city'], data['state'],
+                            data['AvailableDateForMoveIn'],
+                            tuple(UnitAmenities),unitamlength, tuple(BuildingAmenities),buildingamlength])
+            rows = cursor.fetchall()
+    elif UnitAmenities and not BuildingAmenities:
+        unitamlength=len(UnitAmenities)
+        query = """SELECT
+            au.UnitRentID,
+            au.unitNumber,
+            au.MonthlyRent,
+            au.squareFootage,
+            au.AvailableDateForMoveIn
+        FROM
+            ApartmentUnit au
+        JOIN
+            ApartmentBuilding ab ON au.CompanyName = ab.CompanyName AND au.BuildingName = ab.BuildingName
+        WHERE
+            au.MonthlyRent BETWEEN %s AND %s
+            AND ab.AddrCity = %s
+            AND ab.AddrState = %s
+            AND au.AvailableDateForMoveIn >= %s
+            AND EXISTS (
+                SELECT 1 FROM AmenitiesIn ai 
+                WHERE ai.UnitRentID = au.UnitRentID AND ai.aType IN %s
+                GROUP BY ai.UnitRentID
+                HAVING COUNT(DISTINCT ai.aType) = %s
+            )"""
+        with connection.cursor() as cursor:
+            cursor.execute(query,
+                           [data['minRent'], data['maxRent'], data['city'], data['state'],
+                            data['AvailableDateForMoveIn'],
+                            tuple(UnitAmenities),unitamlength])
+            rows = cursor.fetchall()
+    else:
+        buildingamlength = len(BuildingAmenities)
+        query = """SELECT
+                au.UnitRentID,
+                au.unitNumber,
+                au.MonthlyRent,
+                au.squareFootage,
+                au.AvailableDateForMoveIn
+            FROM
+                ApartmentUnit au
+            JOIN
+                ApartmentBuilding ab ON au.CompanyName = ab.CompanyName AND au.BuildingName = ab.BuildingName
+            WHERE
+                au.MonthlyRent BETWEEN %s AND %s
+                AND ab.AddrCity = %s
+                AND ab.AddrState = %s
+                AND au.AvailableDateForMoveIn >= %s
+                AND EXISTS (
+                    SELECT 1 FROM Provides p
+                    WHERE p.CompanyName = ab.CompanyName AND p.BuildingName = ab.BuildingName AND p.aType IN %s
+                    GROUP BY p.CompanyName, p.BuildingName
+                     HAVING COUNT(DISTINCT p.aType) = %s
+                )
+                """
+        with connection.cursor() as cursor:
+            cursor.execute(query,
+                           [data['minRent'], data['maxRent'], data['city'], data['state'],
+                            data['AvailableDateForMoveIn'], tuple(BuildingAmenities),buildingamlength])
+            rows = cursor.fetchall()
 
-    print(query)
-    print(params)
+    response_data = [
+        {
+            "UnitRentID": row[0],
+            "unitNumber": row[1],
+            "MonthlyRent": row[2],
+            "SquareFootage": row[3],
+            "AvailableDateForMoveIn": row[4].isoformat() if row[4] else None
+        } for row in rows
+    ]
 
-    # Execute the query safely
-    with connection.cursor() as cursor:
-        cursor.execute(query, params)
-        columns = [col[0] for col in cursor.description]
-        results = [
-            dict(zip(columns, row))
-            for row in cursor.fetchall()
-        ]
-
-    return JsonResponse(results, safe=False)
-
+    return JsonResponse(response_data, safe=False)

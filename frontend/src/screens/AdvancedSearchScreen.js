@@ -9,29 +9,28 @@ function AdvancedSearchScreen() {
         maxRent: '',
         city: '',
         state: '',
-        earliestAvailableDateForMoveIn: today,
-        latestAvailableDateForMoveIn: today,
-        catCafe: false,
-        centralAC: false,
-        coffeeMachine: false,
-        deliveryRoom: false,
-        dishwasher: false,
-        dryer: false,
-        gameRoom: false,
-        garden: false,
-        gasStove: false,
-        gym: false,
-        inductionCooker: false,
-        parking: false,
-        publicWashingMachine: false,
-        rooftop: false,
-        swimmingPool: false,
-        techLounge: false,
-        washingMachine: false,
-        wasteShredder: false,
+        AvailableDateForMoveIn: today,
+        CatCafe: false,
+        CentralAC: false,
+        CoffeeMachine: false,
+        DeliveryRoom: false,
+        DishWasher: false,
+        Dryer: false,
+        GameRoom: false,
+        Garden: false,
+        GasStove: false,
+        Gym: false,
+        InductionCooker: false,
+        Parking: false,
+        PublicWashingMachine: false,
+        RoofTop: false,
+        SwimmingPool: false,
+        TechLounge: false,
+        WashingMachine: false,
+        WasteShredder: false
+
     });
     const [units, setUnits] = useState([]);
-    const [noMatch, setNoMatch] = useState(false);
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -44,13 +43,35 @@ function AdvancedSearchScreen() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post('http://127.0.0.1:8000/advanced-search/', { params: { ...inputs } });
+            const response = await axios.post('http://127.0.0.1:8000/advanced-search/', {
+                minRent: inputs.minRent,
+                maxRent: inputs.maxRent,
+                city: inputs.city,
+                state: inputs.state,
+                AvailableDateForMoveIn: inputs.AvailableDateForMoveIn,
+                CatCafe: inputs.CatCafe,
+                CentralAC: inputs.CentralAC,
+                CoffeeMachine: inputs.CoffeeMachine,
+                DeliveryRoom: inputs.DeliveryRoom,
+                Dishwasher: inputs.Dishwasher,
+                Dryer: inputs.Dryer,
+                GameRoom: inputs.GameRoom,
+                Garden: inputs.Garden,
+                GasStove: inputs.GasStove,
+                Gym: inputs.Gym,
+                InductionCooker: inputs.InductionCooker,
+                Parking: inputs.Parking,
+                PublicWashingMachine: inputs.PublicWashingMachine,
+                RoofTop: inputs.RoofTop,
+                "Swimming Pool": inputs.SwimmingPool,
+                TechLounge: inputs.TechLounge,
+                WashingMachine: inputs.WashingMachine,
+                WasteShredder: inputs.WasteShredder,
+            });
             if (response.data.length > 0) {
                 setUnits(response.data);
-                setNoMatch(false);
             } else {
                 setUnits([]);
-                setNoMatch(true);
             }
         } catch (error) {
             console.error('Error fetching apartment units:', error);
@@ -163,113 +184,117 @@ function AdvancedSearchScreen() {
                 {/* Inputs for city and state */}
                 <div style={styles.inputGroup}>
                     <label>City:</label>
-                    <input type="text" name="city" value={inputs.city} onChange={handleChange} required style={styles.input}/>
+                    <input type="text" name="city" value={inputs.city} onChange={handleChange} required
+                           style={styles.input}/>
                 </div>
                 <div style={styles.inputGroup}>
                     <label>State (Initials):</label>
-                    <input type="text" name="state" value={inputs.state} onChange={handleChange} required style={styles.input}/>
+                    <input type="text" name="state" value={inputs.state} onChange={handleChange} required
+                           style={styles.input}/>
                 </div>
                 {/* Input for move in date */}
                 <div style={styles.inputGroup}>
-                    <label>Earliest Move In Date:</label>
-                    <input type="date" name="earliestAvailableDateForMoveIn" value={inputs.earliestAvailableDateForMoveIn}
-                           onChange={handleChange} required style={styles.input}/>
-                </div>
-                <div style={styles.inputGroup}>
-                    <label>Latest Move In Date:</label>
-                    <input type="date" name="latestAvailableDateForMoveIn" value={inputs.latestAvailableDateForMoveIn}
+                    <label>Available Date For Move In:</label>
+                    <input type="date" name="AvailableDateForMoveIn"
+                           value={inputs.AvailableDateForMoveIn}
                            onChange={handleChange} required style={styles.input}/>
                 </div>
                 {/* Checkbox inputs for amenities */}
                 <div style={styles.label}>
-                    <input type="checkbox" style={styles.checkBox} name="catCafe" checked={inputs.catCafe}
+                    <label>Building Amenities:</label>
+                </div>
+                <div style={styles.label}>
+                    <input type="checkbox" style={styles.checkBox} name="CatCafe" checked={inputs.CatCafe}
                            onChange={handleChange}/>
                     <span style={styles.labelText}>Cat Cafe</span>
                 </div>
                 <div style={styles.label}>
-                    <input type="checkbox" style={styles.checkBox} name="centralAC" checked={inputs.centralAC}
-                           onChange={handleChange}/>
-                    <span style={styles.labelText}>Central AC</span>
-                </div>
-                <div style={styles.label}>
-                    <input type="checkbox" style={styles.checkBox} name="coffeeMachine" checked={inputs.coffeeMachine}
+                    <input type="checkbox" style={styles.checkBox} name="CoffeeMachine" checked={inputs.CoffeeMachine}
                            onChange={handleChange}/>
                     <span style={styles.labelText}>Coffee Machine</span>
                 </div>
                 <div style={styles.label}>
-                    <input type="checkbox" style={styles.checkBox} name="deliveryRoom" checked={inputs.deliveryRoom}
+                    <input type="checkbox" style={styles.checkBox} name="DeliveryRoom" checked={inputs.DeliveryRoom}
                            onChange={handleChange}/>
                     <span style={styles.labelText}>Delivery Room</span>
                 </div>
                 <div style={styles.label}>
-                    <input type="checkbox" style={styles.checkBox} name="dishwasher" checked={inputs.dishwasher}
-                           onChange={handleChange}/>
-                    <span style={styles.labelText}>Dishwasher</span>
-                </div>
-                <div style={styles.label}>
-                    <input type="checkbox" style={styles.checkBox} name="dryer" checked={inputs.dryer}
-                           onChange={handleChange}/>
-                    <span style={styles.labelText}>Dryer</span>
-                </div>
-                <div style={styles.label}>
-                    <input type="checkbox" style={styles.checkBox} name="gameRoom" checked={inputs.gameRoom}
+                    <input type="checkbox" style={styles.checkBox} name="GameRoom" checked={inputs.GameRoom}
                            onChange={handleChange}/>
                     <span style={styles.labelText}>Game Room</span>
                 </div>
                 <div style={styles.label}>
-                    <input type="checkbox" style={styles.checkBox} name="garden" checked={inputs.garden}
+                    <input type="checkbox" style={styles.checkBox} name="Garden" checked={inputs.Garden}
                            onChange={handleChange}/>
                     <span style={styles.labelText}>Garden</span>
                 </div>
                 <div style={styles.label}>
-                    <input type="checkbox" style={styles.checkBox} name="gasStove" checked={inputs.gasStove}
-                           onChange={handleChange}/>
-                    <span style={styles.labelText}>Gas Stove</span>
-                </div>
-                <div style={styles.label}>
-                    <input type="checkbox" style={styles.checkBox} name="gym" checked={inputs.gym}
+                    <input type="checkbox" style={styles.checkBox} name="Gym" checked={inputs.Gym}
                            onChange={handleChange}/>
                     <span style={styles.labelText}>Gym</span>
                 </div>
                 <div style={styles.label}>
-                    <input type="checkbox" style={styles.checkBox} name="inductionCooker"
-                           checked={inputs.inductionCooker}
-                           onChange={handleChange}/>
-                    <span style={styles.labelText}>Induction Cooker</span>
-                </div>
-                <div style={styles.label}>
-                    <input type="checkbox" style={styles.checkBox} name="parking" checked={inputs.parking}
+                    <input type="checkbox" style={styles.checkBox} name="Parking" checked={inputs.Parking}
                            onChange={handleChange}/>
                     <span style={styles.labelText}>Parking</span>
                 </div>
                 <div style={styles.label}>
-                    <input type="checkbox" style={styles.checkBox} name="publicWashingMachine"
-                           checked={inputs.publicWashingMachine}
+                    <input type="checkbox" style={styles.checkBox} name="PublicWashingMachine"
+                           checked={inputs.PublicWashingMachine}
                            onChange={handleChange}/>
                     <span style={styles.labelText}>Public Washing Machine</span>
                 </div>
                 <div style={styles.label}>
-                    <input type="checkbox" style={styles.checkBox} name="rooftop" checked={inputs.rooftop}
+                    <input type="checkbox" style={styles.checkBox} name="RoofTop" checked={inputs.RoofTop}
                            onChange={handleChange}/>
                     <span style={styles.labelText}>Rooftop</span>
                 </div>
                 <div style={styles.label}>
-                    <input type="checkbox" style={styles.checkBox} name="swimmingPool" checked={inputs.swimmingPool}
+                    <input type="checkbox" style={styles.checkBox} name="SwimmingPool" checked={inputs.SwimmingPool}
                            onChange={handleChange}/>
                     <span style={styles.labelText}>Swimming Pool</span>
                 </div>
                 <div style={styles.label}>
-                    <input type="checkbox" style={styles.checkBox} name="techLounge" checked={inputs.techLounge}
+                    <input type="checkbox" style={styles.checkBox} name="TechLounge" checked={inputs.TechLounge}
                            onChange={handleChange}/>
                     <span style={styles.labelText}>Tech Lounge</span>
                 </div>
                 <div style={styles.label}>
-                    <input type="checkbox" style={styles.checkBox} name="washingMachine" checked={inputs.washingMachine}
+                    <label>Unit Amenities:</label>
+                </div>
+                <div style={styles.label}>
+                    <input type="checkbox" style={styles.checkBox} name="CentralAC" checked={inputs.CentralAC}
+                           onChange={handleChange}/>
+                    <span style={styles.labelText}>Central AC</span>
+                </div>
+                <div style={styles.label}>
+                    <input type="checkbox" style={styles.checkBox} name="DishWasher" checked={inputs.DishWasher}
+                           onChange={handleChange}/>
+                    <span style={styles.labelText}>Dishwasher</span>
+                </div>
+                <div style={styles.label}>
+                    <input type="checkbox" style={styles.checkBox} name="Dryer" checked={inputs.Dryer}
+                           onChange={handleChange}/>
+                    <span style={styles.labelText}>Dryer</span>
+                </div>
+                <div style={styles.label}>
+                    <input type="checkbox" style={styles.checkBox} name="GasStove" checked={inputs.GasStove}
+                           onChange={handleChange}/>
+                    <span style={styles.labelText}>Gas Stove</span>
+                </div>
+                <div style={styles.label}>
+                    <input type="checkbox" style={styles.checkBox} name="InductionCooker"
+                           checked={inputs.InductionCooker}
+                           onChange={handleChange}/>
+                    <span style={styles.labelText}>Induction Cooker</span>
+                </div>
+                <div style={styles.label}>
+                    <input type="checkbox" style={styles.checkBox} name="WashingMachine" checked={inputs.WashingMachine}
                            onChange={handleChange}/>
                     <span style={styles.labelText}>Washing Machine</span>
                 </div>
                 <div style={styles.label}>
-                    <input type="checkbox" style={styles.checkBox} name="wasteShredder" checked={inputs.wasteShredder}
+                    <input type="checkbox" style={styles.checkBox} name="WasteShredder" checked={inputs.WasteShredder}
                            onChange={handleChange}/>
                     <span style={styles.labelText}>Waste Shredder</span>
                 </div>
@@ -278,19 +303,13 @@ function AdvancedSearchScreen() {
                         onMouseOut={e => e.currentTarget.style.backgroundColor = styles.button.backgroundColor}>Submit
                 </button>
             </form>
-            {units.length > 0 ? (
-                <ul style={{width: '100%', maxWidth: '500px'}}>
+            {units.length > 0 && (
+                <ul style={styles.results}>
                     {units.map(unit => (
-                        <li key={unit.UnitID} style={{
-                            listStyle: 'none',
-                            backgroundColor: '#fff',
-                            padding: '15px',
-                            marginBottom: '10px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)', borderRadius: '8px'
-                        }}>
-                            <div>Unit Number: {unit.UnitNumber}</div>
+                        <li key={unit.UnitRentID} style={styles.unit}>
+                            <div>Unit Number: {unit.unitNumber}</div>
                             <div>Monthly Rent: ${unit.MonthlyRent}</div>
-                            <div>City: {unit.AddrCity}</div>
-                            <div>State: {unit.AddrState}</div>
+                            <div>Square Footage: {unit.SquareFootage} sqft</div>
                             <div>Available Date: {unit.AvailableDateForMoveIn}</div>
                             <button style={styles.detailButton} onClick={() => handleViewDetails(unit.UnitRentID)}>
                                 View Details
@@ -298,8 +317,6 @@ function AdvancedSearchScreen() {
                         </li>
                     ))}
                 </ul>
-            ) : noMatch && (
-                <div>No matching units found. Please adjust your search criteria.</div>
             )}
         </div>
     );
