@@ -5,8 +5,9 @@ import { useNavigate } from "react-router-dom";
 function ApartmentListings() {
   const navigate = useNavigate();
   const [inputs, setInputs] = useState({
-    BuildingName: "Mary Island",
-    CompanyName: "Ramos Inc",
+    BuildingName: "",
+    CompanyName: "",
+    UnitNumber: "",
   });
   const [units, setUnits] = useState([]);
 
@@ -18,7 +19,6 @@ function ApartmentListings() {
   const listingRedirect = (e) => {
     navigate(`${e.target.name}/`);
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -28,12 +28,14 @@ function ApartmentListings() {
         UnitNumber: inputs.UnitNumber,
       });
       setUnits(response.data); // Assuming response data is the array of units
+      console.log(units.length);
+      console.log(units.keys);
     } catch (error) {
       console.error("Error fetching apartment units:", error);
       // Handle errors appropriately in a real app
     }
   };
-
+  //   console.log(units);
   const handleViewDetails = (unitId) => {
     // Placeholder for detail view functionality
     navigate(`/unit/${unitId}`);
@@ -151,7 +153,7 @@ function ApartmentListings() {
         </button>
       </form>
 
-      {units.length > 0 && (
+      {units.length > 1 && (
         <ul style={styles.results}>
           {units.map((unit) => (
             <li key={unit.UnitRentID} style={styles.unit}>
@@ -159,9 +161,9 @@ function ApartmentListings() {
               <div>Monthly Rent: ${unit.MonthlyRent}</div>
               <div>Square Footage: {unit.squareFootage} sqft</div>
               <div>Available Date: {unit.AvailableDateForMoveIn}</div>
-              <div># of Bedrooms: </div>
-              <div># of Bathrooms:</div>
-              <div>Average Market Rate:</div>
+              <div># of Bedrooms: {unit.NumBedrooms}</div>
+              <div># of Bathrooms: {unit.NumBathrooms}</div>
+              <div>Average Market Rate: ${unit.AvgMktRate}</div>
               <button
                 style={styles.detailButton}
                 onClick={() => handleViewDetails(unit.UnitRentID)}
@@ -170,6 +172,25 @@ function ApartmentListings() {
               </button>
             </li>
           ))}
+        </ul>
+      )}
+      {!units.length && (
+        <ul style={styles.results}>
+          <li key={units.UnitRentID} style={styles.unit}>
+            <div>Unit Number: {units.unitNumber}</div>
+            <div>Monthly Rent: ${units.MonthlyRent}</div>
+            <div>Square Footage: {units.squareFootage} sqft</div>
+            <div>Available Date: {units.AvailableDateForMoveIn}</div>
+            <div># of Bedrooms: {units.NumBedrooms}</div>
+            <div># of Bathrooms: {units.NumBathrooms}</div>
+            <div>Average Market Rate: ${units.AvgMktRate}</div>
+            <button
+              style={styles.detailButton}
+              onClick={() => handleViewDetails(units.UnitRentID)}
+            >
+              View Details
+            </button>
+          </li>
         </ul>
       )}
     </div>

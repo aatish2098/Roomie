@@ -244,9 +244,11 @@ def listing_view(request):
         data = json.loads(request.body)
         building_name = data.get('BuildingName')
         company_name = data.get('CompanyName')
-        unit_number = data.get('unitNumber')
+        unit_number = data.get('UnitNumber')
 
-
+        print(building_name)
+        print(company_name)
+        print(unit_number)
         if not building_name or not company_name:
             return JsonResponse({'error': 'Missing BuildingName or CompanyName'}, status=400)
 
@@ -290,9 +292,11 @@ def listing_view(request):
                 if result['unitNumber'] == unit_number:
                     responseunit=result
                     break
+        print(responseunit)
         if responseunit:
             return JsonResponse(responseunit, safe=False)
         else:
+            print(results)
             return JsonResponse(results, safe=False)  # Use safe=False when returning a list
 
 
