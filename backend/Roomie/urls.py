@@ -37,6 +37,7 @@ urlpatterns = [
     path('<str:id>/<str:petName>/<str:petType>/', deletePet, name='deletePet'),
     path('budgeting/', budgeting_view, name='budgeting_api'),
     path('listings/', listing_view, name='apartment_units'),
+    path('advanced-search/', advanced_search, name='advanced_search'),
     path('<str:UnitRentID>/getInterests/', get_interest_view, name='interest_listing'),
     path('interests/', post_interest_view, name='interest_addition'),
     path('<str:username>/getFavourite/', get_favourite_view, name='favourite_listing'),

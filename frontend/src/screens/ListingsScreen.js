@@ -16,6 +16,7 @@ function ApartmentListings() {
     setInputs((prev) => ({ ...prev, [name]: value }));
   };
 
+
   const listingRedirect = (e) => {
     navigate(`${e.target.name}/`);
   };

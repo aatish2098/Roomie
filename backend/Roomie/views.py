@@ -306,6 +306,156 @@ def listing_view(request):
         return JsonResponse({'error': str(e)}, status=500)
 
 
+@csrf_exempt  # Use this decorator to exempt this view from CSRF verification.
+@require_http_methods(["POST"])
+def advanced_search(request):
+    data = json.loads(request.body.decode('utf-8'))
+    appliance_keys = [
+        'CentralAC', 'DishWasher', 'Dryer', 'GasStove',
+        'InductionCooker', 'WashingMachine', 'WasteShredder'
+    ]
+
+
+    UnitAmenities = []
+    BuildingAmenities = []
+
+    for key, value in data.items():
+        if value is True:  # Check if the value is True
+            if key in appliance_keys:
+                UnitAmenities.append(key)
+            else:
+                BuildingAmenities.append(key)
+
+
+    if not UnitAmenities and not BuildingAmenities:
+        query = """SELECT
+            au.UnitRentID,
+            au.unitNumber,
+            au.MonthlyRent,
+            au.squareFootage,
+            au.AvailableDateForMoveIn
+        FROM
+            ApartmentUnit au
+        JOIN
+            ApartmentBuilding ab ON au.CompanyName = ab.CompanyName AND au.BuildingName = ab.BuildingName
+        WHERE
+            au.MonthlyRent BETWEEN %s AND %s
+            AND ab.AddrCity = %s
+            AND ab.AddrState = %s
+            AND au.AvailableDateForMoveIn >= %s"""
+        with connection.cursor() as cursor:
+            cursor.execute(query,
+                           [data['minRent'], data['maxRent'], data['city'], data['state'],
+                            data['AvailableDateForMoveIn']])
+            rows = cursor.fetchall()
+    elif UnitAmenities and BuildingAmenities:
+        unitamlength=len(UnitAmenities)
+        buildingamlength=len(BuildingAmenities)
+        query = """SELECT
+        au.UnitRentID,
+        au.unitNumber,
+        au.MonthlyRent,
+        au.squareFootage,
+        au.AvailableDateForMoveIn
+    FROM
+        ApartmentUnit au
+    JOIN
+        ApartmentBuilding ab ON au.CompanyName = ab.CompanyName AND au.BuildingName = ab.BuildingName
+    WHERE
+        au.MonthlyRent BETWEEN %s AND %s
+        AND ab.AddrCity = %s
+        AND ab.AddrState = %s
+        AND au.AvailableDateForMoveIn >= %s
+        AND EXISTS (
+            SELECT 1 FROM AmenitiesIn ai 
+            WHERE ai.UnitRentID = au.UnitRentID AND ai.aType IN %s
+            GROUP BY ai.UnitRentID
+            HAVING COUNT(DISTINCT ai.aType) = %s
+        )
+        AND EXISTS (
+            SELECT 1 FROM Provides p
+            WHERE p.CompanyName = ab.CompanyName AND p.BuildingName = ab.BuildingName AND p.aType IN %s
+            GROUP BY p.CompanyName, p.BuildingName
+            HAVING COUNT(DISTINCT p.aType) = %s
+        )
+        """
+        with connection.cursor() as cursor:
+            cursor.execute(query,
+                           [data['minRent'], data['maxRent'], data['city'], data['state'],
+                            data['AvailableDateForMoveIn'],
+                            tuple(UnitAmenities),unitamlength, tuple(BuildingAmenities),buildingamlength])
+            rows = cursor.fetchall()
+    elif UnitAmenities and not BuildingAmenities:
+        unitamlength=len(UnitAmenities)
+        query = """SELECT
+            au.UnitRentID,
+            au.unitNumber,
+            au.MonthlyRent,
+            au.squareFootage,
+            au.AvailableDateForMoveIn
+        FROM
+            ApartmentUnit au
+        JOIN
+            ApartmentBuilding ab ON au.CompanyName = ab.CompanyName AND au.BuildingName = ab.BuildingName
+        WHERE
+            au.MonthlyRent BETWEEN %s AND %s
+            AND ab.AddrCity = %s
+            AND ab.AddrState = %s
+            AND au.AvailableDateForMoveIn >= %s
+            AND EXISTS (
+                SELECT 1 FROM AmenitiesIn ai 
+                WHERE ai.UnitRentID = au.UnitRentID AND ai.aType IN %s
+                GROUP BY ai.UnitRentID
+                HAVING COUNT(DISTINCT ai.aType) = %s
+            )"""
+        with connection.cursor() as cursor:
+            cursor.execute(query,
+                           [data['minRent'], data['maxRent'], data['city'], data['state'],
+                            data['AvailableDateForMoveIn'],
+                            tuple(UnitAmenities),unitamlength])
+            rows = cursor.fetchall()
+    else:
+        buildingamlength = len(BuildingAmenities)
+        query = """SELECT
+                au.UnitRentID,
+                au.unitNumber,
+                au.MonthlyRent,
+                au.squareFootage,
+                au.AvailableDateForMoveIn
+            FROM
+                ApartmentUnit au
+            JOIN
+                ApartmentBuilding ab ON au.CompanyName = ab.CompanyName AND au.BuildingName = ab.BuildingName
+            WHERE
+                au.MonthlyRent BETWEEN %s AND %s
+                AND ab.AddrCity = %s
+                AND ab.AddrState = %s
+                AND au.AvailableDateForMoveIn >= %s
+                AND EXISTS (
+                    SELECT 1 FROM Provides p
+                    WHERE p.CompanyName = ab.CompanyName AND p.BuildingName = ab.BuildingName AND p.aType IN %s
+                    GROUP BY p.CompanyName, p.BuildingName
+                     HAVING COUNT(DISTINCT p.aType) = %s
+                )
+                """
+        with connection.cursor() as cursor:
+            cursor.execute(query,
+                           [data['minRent'], data['maxRent'], data['city'], data['state'],
+                            data['AvailableDateForMoveIn'], tuple(BuildingAmenities),buildingamlength])
+            rows = cursor.fetchall()
+
+    response_data = [
+        {
+            "UnitRentID": row[0],
+            "unitNumber": row[1],
+            "MonthlyRent": row[2],
+            "SquareFootage": row[3],
+            "AvailableDateForMoveIn": row[4].isoformat() if row[4] else None
+        } for row in rows
+    ]
+
+    return JsonResponse(response_data, safe=False)
+
 @require_http_methods(["GET"])
 def get_interest_view(request, UnitRentID):
     query = """
@@ -475,4 +625,3 @@ def detailedUnitInfo(request, pk):
     except Exception as e:
         print(e)
         return Response({"message": str(e)})
-
