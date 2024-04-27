@@ -203,11 +203,10 @@ def deletePet(request, id, petName, petType):
     return Response({"message": "Pet successfully deleted."})
 
 
-@csrf_exempt  # Use this decorator to exempt this view from CSRF verification.
-@require_http_methods(["POST"])  # This view only accepts POST requests.
+@csrf_exempt
+@require_http_methods(["POST"])
 def budgeting_view(request):
     if request.method == 'POST':
-        # Assuming the body of the request is JSON
         data = json.loads(request.body)
         zipcode = data.get('zipcode')
         numBathrooms = int(data.get('numBathrooms'))
@@ -238,21 +237,20 @@ def budgeting_view(request):
             return JsonResponse({'status': 'error', 'message': 'No data found'}, status=404)
 
 
-@csrf_exempt  # Use this decorator to exempt this view from CSRF verification.
-@require_http_methods(["GET"])
+@csrf_exempt
+@require_http_methods(["POST"])
 def listing_view(request):
     try:
-        # Parse JSON data from the request
         data = json.loads(request.body)
         building_name = data.get('BuildingName')
         company_name = data.get('CompanyName')
         unit_number = data.get('unitNumber')
 
-        # Validate input
+
         if not building_name or not company_name:
             return JsonResponse({'error': 'Missing BuildingName or CompanyName'}, status=400)
 
-            # SQL Query to fetch data from ApartmentUnit table
+
         query = """
                 SELECT 
                     AU1.UnitRentID,
@@ -302,3 +300,106 @@ def listing_view(request):
         return JsonResponse({'error': 'Invalid JSON'}, status=400)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
+@require_http_methods(["GET"])
+def get_interest_view(request, UnitRentID):
+    query = """
+        SELECT 
+            I.UnitRentID,
+            I.MoveInDate,
+            I.RoommateCnt AS RoommateCount,
+            U.Phone AS PhoneNumber,
+            U.email
+        FROM 
+            Interests I
+        JOIN 
+            Users U ON I.username = U.username
+        WHERE 
+            I.UnitRentID = %s;
+    """
+
+    # Execute the query
+    with connection.cursor() as cursor:
+        cursor.execute(query, [UnitRentID])
+        columns = [col[0] for col in cursor.description]
+        results = [
+            dict(zip(columns, row))
+            for row in cursor.fetchall()
+        ]
+
+    formatted_results = [
+        {
+            "unitRentID": result['UnitRentID'],
+            "MoveInDate": result['MoveInDate'].strftime('%m-%d-%Y'),
+            "RoommateCount": str(result['RoommateCount']),
+            "PhoneNumber": result['PhoneNumber'],
+            "email": result['email']
+        }
+        for result in results
+    ]
+
+    return JsonResponse(formatted_results, safe=False)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def post_interest_view(request):
+    try:
+        data = json.loads(request.body)
+        username = data['username']
+        unit_rent_id = data['unitRentID']
+        roommate_count = data['roommateCount']
+        move_in_date = data['MoveInDate']
+    except (KeyError, json.JSONDecodeError) as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+
+    query = """
+        INSERT INTO Interests (username, UnitRentID, RoommateCnt, MoveInDate)
+        VALUES (%s, %s, %s, %s)
+        ON DUPLICATE KEY UPDATE
+        RoommateCnt = VALUES(RoommateCnt), MoveInDate = VALUES(MoveInDate);
+    """
+
+    # Execute the query
+    with connection.cursor() as cursor:
+        try:
+            cursor.execute(query, [username, unit_rent_id, roommate_count, move_in_date])
+            connection.commit()
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+    # Successful response
+    return JsonResponse({'status': 'success'}, status=200)
+
+
+@require_http_methods(["GET"])
+def get_favourite_view(request, username):
+    query = """
+        SELECT UnitRentID
+        FROM Favourite
+        WHERE username = %s;
+    """
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(query, [username])
+            unit_rent_ids = [row[0] for row in cursor.fetchall()]
+        return JsonResponse({'username': username, 'favourites': unit_rent_ids}, status=200)
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])  # Allows only POST requests to this view.
+def add_favourite_view(request, username, unitRentID):
+    try:
+        # Insert into the Favourite table
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                INSERT INTO Favourite (username, UnitRentID)
+                VALUES (%s, %s)
+                ON DUPLICATE KEY UPDATE UnitRentID=UnitRentID;
+            """, [username, unitRentID])
+            connection.commit()
+        return JsonResponse({'status': 'success', 'message': 'Favourite added successfully.'}, status=201)
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
