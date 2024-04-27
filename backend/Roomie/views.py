@@ -17,6 +17,7 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser
 import json
 from .serializers import *
 
+
 @api_view(['POST'])
 def register(request):
     if request.method == 'POST':
@@ -33,7 +34,7 @@ def register(request):
         })
         print(form.errors)
         if form.is_valid():
-        #     # Extract data from POST request
+            #     # Extract data from POST request
             username = request.data.get('username')
             first_name = request.data.get('first_name')
             last_name = request.data.get('last_name')
@@ -42,7 +43,7 @@ def register(request):
             dob = request.data.get('dob')
             gender = request.data.get('gender')  # Make sure this is an integer
             phone = request.data.get('phone')
-            
+
             # Check if user already exists in MySql
             with connection.cursor() as cursor:
                 cursor.execute("""
@@ -51,7 +52,7 @@ def register(request):
                     WHERE username = %s
                     """, [username])
                 userNameExists = cursor.fetchone()
-            
+
             if userNameExists:
                 response_data = {'message': "Invalid Credentials: Username Possibly Already Taken"}
                 return Response(response_data)
@@ -64,7 +65,6 @@ def register(request):
                 email=email,
                 password=password  # Password is hashed automatically
             )
-
 
             with connection.cursor() as cursor:
                 cursor.execute("""
@@ -81,36 +81,39 @@ def register(request):
         response_data = {'message': "Invalid Request"}
         return Response(response_data)
 
+
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
-        
         data = super().validate(attrs)
-        serializer=UserSerializerWithToken(self.user).data
-        for k,v in serializer.items():
-            data[k]=v
+        serializer = UserSerializerWithToken(self.user).data
+        for k, v in serializer.items():
+            data[k] = v
         authenticate(self.context['request']._request, username=attrs["username"], password=attrs["password"])
         return data
-    
+
+
 class MyTokenObtainPairView(TokenObtainPairView):
-    serializer_class=MyTokenObtainPairSerializer
+    serializer_class = MyTokenObtainPairSerializer
+
 
 def homepage(request):
     # This view will render a template called 'homepage.html'
     return render(request, 'homepage.html')
 
+
 def main(request):
     # Logic for the main view
     return render(request, 'main.html')
 
+
 class PetView(CreateView):
     form_class = PetRegistrationForm
-    template_name='pet.html'
-
+    template_name = 'pet.html'
 
 
 @api_view(['GET'])
 def getPets(request, id):
-    username=id
+    username = id
 
     with connection.cursor() as cursor:
         cursor.execute("""
@@ -120,7 +123,7 @@ def getPets(request, id):
             """, [username])
 
         pets = cursor.fetchall()
-    
+
     print(pets)
     return Response({"pets": pets})
 
@@ -128,7 +131,7 @@ def getPets(request, id):
 @api_view(['POST'])
 # @permission_classes([IsAuthenticated])
 def addPet(request, id):
-    username=id
+    username = id
     form = PetRegistrationForm({
         "username": request.data.get('username'),
         "petName": request.data.get('petName'),
@@ -151,14 +154,14 @@ def addPet(request, id):
                 """, [petName, petType, petSize, username])
 
             pets = cursor.fetchall()
-    
+
     return Response({"pets": pets})
 
 
 @api_view(['POST'])
 # @permission_classes([IsAuthenticated])
 def editPet(request, id):
-    username=id
+    username = id
     form = PetRegistrationForm({
         "username": request.data.get('username'),
         "petName": request.data.get('petName'),
@@ -182,8 +185,6 @@ def editPet(request, id):
                 WHERE username = %s AND PetName = %s AND PetType = %s
                 """, [petName, petType, petSize, username, oldPetName, oldPetType])
 
-
-    
     return Response({"message": "Pet successfully updated."})
 
 
@@ -199,15 +200,13 @@ def deletePet(request, id, petName, petType):
             WHERE username = %s AND PetName = %s AND PetType = %s
             """, [username, petName, petType])
 
-
-    
     return Response({"message": "Pet successfully deleted."})
 
-@csrf_exempt  # Use this decorator to exempt this view from CSRF verification.
-@require_http_methods(["POST"])  # This view only accepts POST requests.
+
+@csrf_exempt
+@require_http_methods(["POST"])
 def budgeting_view(request):
     if request.method == 'POST':
-        # Assuming the body of the request is JSON
         data = json.loads(request.body)
         zipcode = data.get('zipcode')
         numBathrooms = int(data.get('numBathrooms'))
@@ -237,24 +236,46 @@ def budgeting_view(request):
         else:
             return JsonResponse({'status': 'error', 'message': 'No data found'}, status=404)
 
-@csrf_exempt  # Use this decorator to exempt this view from CSRF verification.
+
+@csrf_exempt
 @require_http_methods(["POST"])
 def listing_view(request):
     try:
-        # Parse JSON data from the request
         data = json.loads(request.body)
         building_name = data.get('BuildingName')
         company_name = data.get('CompanyName')
+        unit_number = data.get('unitNumber')
 
-        # Validate input
+
         if not building_name or not company_name:
             return JsonResponse({'error': 'Missing BuildingName or CompanyName'}, status=400)
 
-        # SQL Query to fetch data from ApartmentUnit table
+
         query = """
-            SELECT * FROM ApartmentUnit
-            WHERE BuildingName = %s AND CompanyName = %s;
-        """
+                SELECT 
+                    AU1.UnitRentID,
+                    AU1.CompanyName,
+                    AU1.BuildingName,
+                    AU1.unitNumber,
+                    AU1.MonthlyRent,
+                    AU1.squareFootage,
+                    AU1.AvailableDateForMoveIn,
+                    ROUND(AVG(AU2.MonthlyRent), 0) AS AvgMktRate,
+                    (SELECT COUNT(*) FROM Rooms WHERE UnitRentID = AU1.UnitRentID AND description LIKE '%%bathroom%%') AS NumBathrooms,
+                    (SELECT COUNT(*) FROM Rooms WHERE UnitRentID = AU1.UnitRentID AND description LIKE '%%bedroom%%') AS NumBedrooms
+                FROM 
+                    ApartmentUnit AU1
+                INNER JOIN 
+                    ApartmentBuilding AB1 ON AU1.CompanyName = AB1.CompanyName AND AU1.BuildingName = AB1.BuildingName
+                LEFT JOIN 
+                    ApartmentUnit AU2 ON AU1.CompanyName = AU2.CompanyName AND AU1.BuildingName = AU2.BuildingName AND AU2.squareFootage BETWEEN AU1.squareFootage * 0.9 AND AU1.squareFootage * 1.1
+                INNER JOIN 
+                    ApartmentBuilding AB2 ON AU2.CompanyName = AB2.CompanyName AND AU2.BuildingName = AB2.BuildingName AND AB1.AddrCity = AB2.AddrCity
+                WHERE 
+                    AU1.BuildingName = %s AND AU1.CompanyName = %s
+                GROUP BY 
+                    AU1.UnitRentID, AU1.unitNumber, AU1.MonthlyRent, AU1.squareFootage, AU1.AvailableDateForMoveIn, AU1.CompanyName, AU1.BuildingName;
+            """
 
         with connection.cursor() as cursor:
             cursor.execute(query, [building_name, company_name])
@@ -263,13 +284,126 @@ def listing_view(request):
                 dict(zip(columns, row))
                 for row in cursor.fetchall()
             ]
+        responseunit=[]
+        if unit_number:
+            for result in results:
+                if result['unitNumber'] == unit_number:
+                    responseunit=result
+                    break
+        if responseunit:
+            return JsonResponse(responseunit, safe=False)
+        else:
+            return JsonResponse(results, safe=False)  # Use safe=False when returning a list
 
-        return JsonResponse(results, safe=False)  # Use safe=False when returning a list
 
     except json.JSONDecodeError:
         return JsonResponse({'error': 'Invalid JSON'}, status=400)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
+
+@require_http_methods(["GET"])
+def get_interest_view(request, UnitRentID):
+    query = """
+        SELECT 
+            I.UnitRentID,
+            I.MoveInDate,
+            I.RoommateCnt AS RoommateCount,
+            U.Phone AS PhoneNumber,
+            U.email
+        FROM 
+            Interests I
+        JOIN 
+            Users U ON I.username = U.username
+        WHERE 
+            I.UnitRentID = %s;
+    """
+
+    # Execute the query
+    with connection.cursor() as cursor:
+        cursor.execute(query, [UnitRentID])
+        columns = [col[0] for col in cursor.description]
+        results = [
+            dict(zip(columns, row))
+            for row in cursor.fetchall()
+        ]
+
+    formatted_results = [
+        {
+            "unitRentID": result['UnitRentID'],
+            "MoveInDate": result['MoveInDate'].strftime('%m-%d-%Y'),
+            "RoommateCount": str(result['RoommateCount']),
+            "PhoneNumber": result['PhoneNumber'],
+            "email": result['email']
+        }
+        for result in results
+    ]
+
+    return JsonResponse(formatted_results, safe=False)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def post_interest_view(request):
+    try:
+        data = json.loads(request.body)
+        username = data['username']
+        unit_rent_id = data['unitRentID']
+        roommate_count = data['roommateCount']
+        move_in_date = data['MoveInDate']
+    except (KeyError, json.JSONDecodeError) as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+
+    query = """
+        INSERT INTO Interests (username, UnitRentID, RoommateCnt, MoveInDate)
+        VALUES (%s, %s, %s, %s)
+        ON DUPLICATE KEY UPDATE
+        RoommateCnt = VALUES(RoommateCnt), MoveInDate = VALUES(MoveInDate);
+    """
+
+    # Execute the query
+    with connection.cursor() as cursor:
+        try:
+            cursor.execute(query, [username, unit_rent_id, roommate_count, move_in_date])
+            connection.commit()
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+    # Successful response
+    return JsonResponse({'status': 'success'}, status=200)
+
+
+@require_http_methods(["GET"])
+def get_favourite_view(request, username):
+    query = """
+        SELECT UnitRentID
+        FROM Favourite
+        WHERE username = %s;
+    """
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(query, [username])
+            unit_rent_ids = [row[0] for row in cursor.fetchall()]
+        return JsonResponse({'username': username, 'favourites': unit_rent_ids}, status=200)
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])  # Allows only POST requests to this view.
+def add_favourite_view(request, username, unitRentID):
+    try:
+        # Insert into the Favourite table
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                INSERT INTO Favourite (username, UnitRentID)
+                VALUES (%s, %s)
+                ON DUPLICATE KEY UPDATE UnitRentID=UnitRentID;
+            """, [username, unitRentID])
+            connection.commit()
+        return JsonResponse({'status': 'success', 'message': 'Favourite added successfully.'}, status=201)
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
 
 @api_view(['GET'])
@@ -337,3 +471,4 @@ def detailedUnitInfo(request, pk):
     except Exception as e:
         print(e)
         return Response({"message": str(e)})
+
