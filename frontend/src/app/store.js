@@ -9,22 +9,14 @@ import {
   userGetPetsReducers,
   userAddPetReducers,
 } from "../reducers/userReducers";
-import {
-  listingsViewReducer,
-  listingsCreateReducer,
-  listingsUploadImageReducer,
-  listingViewReducer,
-} from "../reducers/listingsReducers";
+import { unitViewReducer } from "../reducers/listingsReducers";
 
 const reducer = combineReducers({
   userLogin: userLoginReducers,
   userSignup: userSignupReducers,
   userPets: userGetPetsReducers,
   userAddPet: userAddPetReducers,
-  listingsView: listingsViewReducer,
-  listingView: listingViewReducer,
-  listingsCreate: listingsCreateReducer,
-  listingsUploadImage: listingsUploadImageReducer,
+  unitDetails: unitViewReducer,
 });
 
 const initialState = {};

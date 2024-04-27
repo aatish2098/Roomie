@@ -1,7 +1,7 @@
 import React from "react";
 import { Container } from "react-bootstrap";
 import Header from "./components/Header";
-import Budgeting from './components/Budgeting';
+import Budgeting from "./components/Budgeting";
 import { HashRouter as Router, Routes, Route } from "react-router-dom";
 import HomeScreen from "./screens/HomeScreen";
 import SignUpScreen from "./screens/SignUpScreen";
@@ -19,11 +19,7 @@ export default function App() {
         <Routes>
           <Route exact path="/" element={<HomeScreen />}></Route>
           <Route exact path="/listings" element={<ListingsScreen />}></Route>
-          <Route
-            exact
-            path="/listings/:id"
-            element={<ViewListingScreen />}
-          ></Route>
+          <Route exact path="/unit/:id" element={<ViewListingScreen />}></Route>
           <Route exact path="/signup" element={<SignUpScreen />}></Route>
           <Route exact path="/settings" element={<SettingsScreen />}></Route>
           <Route exact path="/budgeting" element={<Budgeting />} />

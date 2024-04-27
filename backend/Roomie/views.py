@@ -301,6 +301,7 @@ def listing_view(request):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
+
 @require_http_methods(["GET"])
 def get_interest_view(request, UnitRentID):
     query = """
@@ -403,3 +404,71 @@ def add_favourite_view(request, username, unitRentID):
         return JsonResponse({'status': 'success', 'message': 'Favourite added successfully.'}, status=201)
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+
+@api_view(['GET'])
+def detailedUnitInfo(request, pk):
+    try:
+        unitRentID = int(pk)
+
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT *
+                FROM apartmentunit
+                WHERE UnitRentID = %s;
+                """, [unitRentID])
+            
+            unitInfo = cursor.fetchone()
+        print(unitInfo)
+
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT aType 
+                FROM apartmentunit AS apt
+                NATURAL JOIN amenitiesin AS ai
+                # JOIN rooms AS r ON apt.UnitRentID = r.UnitRentID
+                WHERE apt.UnitRentID = %s;
+                """, [unitRentID])
+            
+            unitAmenities = cursor.fetchall()
+        
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT (SELECT COUNT(*) FROM Rooms WHERE UnitRentID = apt.UnitRentID AND description LIKE '%%bathroom%%') AS NumBathrooms, 
+                           (SELECT COUNT(*) FROM Rooms WHERE UnitRentID = apt.UnitRentID AND description LIKE '%%bedroom%%') AS NumBedrooms
+                FROM apartmentunit AS apt
+                WHERE apt.UnitRentID = %s;
+                """, [unitRentID])
+            
+            unitRooms = cursor.fetchall()
+
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT *, 
+                           (SELECT COUNT(*)
+                            FROM ApartmentUnit AS a
+                            WHERE a.CompanyName = %s AND a.BuildingName = %s
+                            GROUP BY a.CompanyName, a.BuildingName 
+                           )
+                FROM ApartmentBuilding as b1
+                WHERE b1.CompanyName = %s AND b1.BuildingName = %s;
+                """, [unitInfo[1], unitInfo[2], unitInfo[1], unitInfo[2]])
+            
+            buildingInfo = cursor.fetchall()
+
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT aType
+                FROM Provides
+                WHERE CompanyName = %s AND BuildingName = %s;
+                """, [unitInfo[1], unitInfo[2]])
+            
+            buildingAmenities = cursor.fetchall()
+
+        print(buildingInfo)
+        return Response({"unitInfo": unitInfo, "unitAmenities": unitAmenities, "unitRooms": unitRooms, "buildingInfo": buildingInfo, "buildingAmenities": buildingAmenities})
+
+    except Exception as e:
+        print(e)
+        return Response({"message": str(e)})
+

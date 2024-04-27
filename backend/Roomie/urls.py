@@ -41,5 +41,6 @@ urlpatterns = [
     path('interests/', post_interest_view, name='interest_addition'),
     path('<str:username>/getFavourite/', get_favourite_view, name='favourite_listing'),
     path('<str:username>/<str:unitRentID>/favourite/', add_favourite_view, name='favourite_add'),
+    path('unit/<str:pk>/', detailedUnitInfo, name='detailedUnitInfo'),
 ]
 
