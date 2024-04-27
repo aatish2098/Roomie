@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from "react-router-dom";
 
 function AdvancedSearchScreen() {
+    const navigate = useNavigate();
+
     const today = new Date().toISOString().split('T')[0];
 
     const [inputs, setInputs] = useState({
@@ -78,9 +81,11 @@ function AdvancedSearchScreen() {
         }
     };
 
-    const handleViewDetails = (unitId) => {
-        console.log('View details for unit:', unitId);
-    };
+  const handleViewDetails = (unitId) => {
+    // Placeholder for detail view functionality
+    navigate(`/unit/${unitId}`);
+    // You can replace this with navigation or setting state to show details
+  };
 
     const styles = {
         container: {
