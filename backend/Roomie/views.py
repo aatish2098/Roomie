@@ -545,8 +545,11 @@ def get_favourite_view(request, username):
 
 @csrf_exempt
 @require_http_methods(["POST"])  # Allows only POST requests to this view.
-def add_favourite_view(request, username, unitRentID):
+def add_favourite_view(request):
     try:
+        data = json.loads(request.body)
+        username = data['username']
+        unitRentID = data['unitRentID']
         # Insert into the Favourite table
         with connection.cursor() as cursor:
             cursor.execute("""
