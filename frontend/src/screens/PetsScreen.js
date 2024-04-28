@@ -14,7 +14,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { getPets, addPet, editPet, deletePet } from "../actions/userActions";
 
-function UserProfileScreen({ params }) {
+function PetsScreen({ params }) {
   // const userLogin = useSelector((state) => state.userLogin);
   // const { userInfo } = userLogin;
   const { id } = useParams();
@@ -53,6 +53,9 @@ function UserProfileScreen({ params }) {
   };
 
   useEffect(() => {
+    if (!userInfo || id !== userInfo.username) {
+      navigate("/login");
+    }
     dispatch(getPets(id));
   }, [dispatch, showModal, showModal2]);
 
@@ -449,4 +452,4 @@ function UserProfileScreen({ params }) {
   );
 }
 
-export default UserProfileScreen;
+export default PetsScreen;

@@ -20,6 +20,18 @@ import {
   USER_DELETE_PET_REQUEST,
   USER_DELETE_PET_SUCCESS,
   USER_DELETE_PET_FAIL,
+  USER_FAV_REQUEST,
+  USER_FAV_SUCCESS,
+  USER_FAV_FAIL,
+  USER_GET_FAVS_REQUEST,
+  USER_GET_FAVS_SUCCESS,
+  USER_GET_FAVS_FAIL,
+  USER_CHECK_FAV_REQUEST,
+  USER_CHECK_FAV_SUCCESS,
+  USER_CHECK_FAV_FAIL,
+  USER_DEL_FAV_REQUEST,
+  USER_DEL_FAV_SUCCESS,
+  USER_DEL_FAV_FAIL,
 } from "../constants/userConstants";
 
 // axios.defaults.headers.post["Access-Control-Allow-Origin"] = "*";
@@ -146,7 +158,7 @@ export const addPet =
 
       const config = {
         headers: {
-          "Content-Type": "multipart/form-data",
+          "Content-Type": "application/json",
         },
       };
       console.log(username, petName, petType, petSize);
@@ -190,7 +202,7 @@ export const editPet =
       console.log([username, petName, petType, petSize]);
       const config = {
         headers: {
-          "Content-Type": "multipart/form-data",
+          "Content-Type": "application/json",
           // Authorization: `Bearer ${userInfo.token}`, // Assuming your backend uses token-based auth
         },
       };
@@ -244,6 +256,131 @@ export const deletePet = (username, petName, petType) => async (dispatch) => {
       payload:
         error.response && error.response.data.message
           ? error.response.data.message
+          : error.message,
+    });
+  }
+};
+
+export const addFav = (username, unitRentID) => async (dispatch) => {
+  try {
+    dispatch({
+      type: USER_FAV_REQUEST,
+    });
+
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    };
+    console.log(username, unitRentID);
+    const { data } = await axios.post(
+      `http://127.0.0.1:8000/addFavourite/`,
+      {
+        username: username,
+        unitRentID: unitRentID,
+      },
+      config
+    );
+
+    dispatch({
+      type: USER_FAV_SUCCESS,
+      payload: data,
+    });
+  } catch (error) {
+    dispatch({
+      type: USER_FAV_FAIL,
+      payload:
+        error.response && error.response.data.detail
+          ? error.response.data.detail
+          : error.message,
+    });
+  }
+};
+
+export const getFavs = (username) => async (dispatch) => {
+  try {
+    dispatch({
+      type: USER_GET_FAVS_REQUEST,
+    });
+
+    // console.log(username);
+    const { data } = await axios.get(
+      `http://127.0.0.1:8000/${username}/getFavourites/`
+    );
+
+    dispatch({
+      type: USER_GET_FAVS_SUCCESS,
+      payload: data,
+    });
+  } catch (error) {
+    dispatch({
+      type: USER_GET_FAVS_FAIL,
+      payload:
+        error.response && error.response.data.detail
+          ? error.response.data.detail
+          : error.message,
+    });
+  }
+};
+
+export const checkFav = (username, unitRentID) => async (dispatch) => {
+  try {
+    dispatch({
+      type: USER_CHECK_FAV_REQUEST,
+    });
+
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    };
+
+    console.log(username);
+    const { data } = await axios.post(
+      `http://127.0.0.1:8000/checkFav/`,
+      {
+        username: username,
+        unitRentID: unitRentID,
+      },
+      config
+    );
+
+    dispatch({
+      type: USER_CHECK_FAV_SUCCESS,
+      payload: data,
+    });
+  } catch (error) {
+    dispatch({
+      type: USER_CHECK_FAV_FAIL,
+      payload:
+        error.response && error.response.data.detail
+          ? error.response.data.detail
+          : error.message,
+    });
+  }
+};
+
+export const delFav = (username, unitRentID) => async (dispatch) => {
+  try {
+    dispatch({
+      type: USER_DEL_FAV_REQUEST,
+    });
+
+    console.log(username);
+    const { data } = await axios.delete(
+      `http://127.0.0.1:8000/${username}/${unitRentID}/delFavourite/`
+    );
+
+    dispatch({
+      type: USER_DEL_FAV_SUCCESS,
+      payload: data,
+    });
+  } catch (error) {
+    dispatch({
+      type: USER_DEL_FAV_FAIL,
+      payload:
+        error.response && error.response.data.detail
+          ? error.response.data.detail
           : error.message,
     });
   }

@@ -66,3 +66,12 @@ class PetRegistrationForm(forms.Form):
             'petType': forms.Select(choices=petTypes, attrs={'class': 'form-control'}),
             'petSize': forms.Select(choices=petSizes, attrs={'class': 'form-control'})
         }
+
+
+class FavouriteForm(forms.Form):
+    username = forms.CharField(max_length=20, validators=[RegexValidator(r'^\w+$', 'Enter a valid username. This value may contain only letters, numbers, and _ character.')])
+    unitRentID = forms.CharField(max_length=20)
+
+    class Meta:
+        fields = ["username", 'unitRentID']
+

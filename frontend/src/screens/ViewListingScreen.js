@@ -1,8 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useParams } from "react-router-dom";
+import { useAsyncError, useParams } from "react-router-dom";
 
-import { fetchListingDetails } from "../actions/listingsActions";
+import {
+  fetchListingDetails,
+  getPetPolicies,
+} from "../actions/listingsActions";
+import { getPets, addFav, checkFav, delFav } from "../actions/userActions";
 import {
   Container,
   Row,
@@ -20,21 +24,55 @@ import Loader from "../components/Loader";
 
 function ViewListingScreen({ params }) {
   const { id } = useParams();
+  const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
   const unitState = useSelector((state) => state.unitDetails);
   const { loading, error, unitDetails } = unitState;
-  const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+  const userPets = useSelector((state) => state.userPets);
+  const { errorPet, loadingPet, pets } = userPets;
+  const unitPetPolicy = useSelector((state) => state.unitPetPolicy);
+  const { errorPolicy, loadingPolicy, petPolicy } = unitPetPolicy;
+  const userCheckFav = useSelector((state) => state.userCheckFav);
+  const { errorFav, loadingFav, isFav } = userCheckFav;
+  const [flag, setFlag] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [showPetModal, setShowPetModal] = useState(false);
+  // const [favorited, setFavorited] = useState(false);
   // console.log(unitDetails);
-
+  console.log(isFav);
   const handleToggleModal = () => {
     setShowModal(!showModal);
   };
 
+  const handleTogglepetModal = () => {
+    setShowPetModal(!showPetModal);
+  };
+
+  const loadPolicies = () => {
+    dispatch(getPetPolicies(buildingInfo[0], buildingInfo[1], pets.pets));
+    setShowPetModal(!showPetModal);
+  };
+
+  const handleFav = () => {
+    dispatch(addFav(userInfo.username, id));
+    setFlag(!flag);
+  };
+
+  const handleRemoveFav = () => {
+    dispatch(delFav(userInfo.username, id));
+    setFlag(!flag);
+  };
+
   useEffect(() => {
+    if (userInfo) {
+      dispatch(checkFav(userInfo.username, id));
+      dispatch(getPets(userInfo.username));
+    }
     dispatch(fetchListingDetails(id));
-  }, [dispatch]);
+  }, [dispatch, flag]);
 
   const apt = unitDetails.unitInfo;
   const aptAmenities = unitDetails.unitAmenities;
@@ -42,11 +80,8 @@ function ViewListingScreen({ params }) {
   const buildingInfo =
     unitDetails.length != 0 ? unitDetails.buildingInfo[0] : null;
   const buildingAmenities = unitDetails.buildingAmenities;
-  // console.log(apt);
-  // console.log(aptAmenities);
-  // console.log(aptRooms);
-  console.log(buildingInfo);
-  console.log(buildingAmenities);
+
+  // console.log(petPolicy);
 
   return (
     <div>
@@ -73,13 +108,28 @@ function ViewListingScreen({ params }) {
                         </span>{" "}
                         {apt[0]}
                       </Card.Text>
-                      <Button variant="info" style={{ fontSize: "75%" }}>
-                        Add to Favorites
-                      </Button>
+                      {userInfo && isFav && !isFav.isFav && (
+                        <Button
+                          variant="info"
+                          onClick={handleFav}
+                          style={{ fontSize: "75%", borderRadius: "7px" }}
+                        >
+                          Add to Favorites
+                        </Button>
+                      )}
+                      {userInfo && isFav && isFav.isFav && (
+                        <Button
+                          variant="danger"
+                          onClick={handleRemoveFav}
+                          style={{ fontSize: "75%", borderRadius: "7px" }}
+                        >
+                          Remove From Favorites
+                        </Button>
+                      )}
                       <Button
                         variant="info"
                         className="m-3"
-                        style={{ fontSize: "75%" }}
+                        style={{ fontSize: "75%", borderRadius: "7px" }}
                         onClick={handleToggleModal}
                       >
                         View Interests
@@ -145,8 +195,18 @@ function ViewListingScreen({ params }) {
                       </span>
                       {buildingInfo[0]}
                     </Card.Text>
+                    {userInfo && (
+                      <Button
+                        className="ms-3"
+                        variant="info"
+                        onClick={loadPolicies}
+                        style={{ fontSize: "75%", borderRadius: "7px" }}
+                      >
+                        View Pet Policies
+                      </Button>
+                    )}
                     <Card.Text
-                      className="ms-3"
+                      className="ms-3 mt-3"
                       style={{ color: "white", fontSize: "100%" }}
                     >
                       <span style={{ fontWeight: "bold", color: "#faafaf" }}>
@@ -270,6 +330,126 @@ function ViewListingScreen({ params }) {
               Submit Interest
             </Button>
           </Modal.Footer>
+        </Modal>
+        <Modal
+          centered={true}
+          size="lg"
+          show={showPetModal}
+          backdrop={true}
+          keyboard="true"
+          onHide={handleTogglepetModal}
+          scrollable={true}
+        >
+          <Modal.Header closeButton style={{ backgroundColor: "#000000" }}>
+            <Modal.Title
+              style={{
+                font: "caption",
+                fontFamily: "revert-layer",
+              }}
+              className="text-light"
+            >
+              Pet Eligibility
+            </Modal.Title>
+          </Modal.Header>
+          <ModalBody style={{ backgroundColor: "#fffaf0" }}>
+            <Row>
+              <Col>
+                <Card.Text
+                  style={{
+                    textDecorationLine: "underline",
+                    textAlign: "center",
+                  }}
+                >
+                  Your Pet
+                </Card.Text>
+              </Col>
+              <Col>
+                <Card.Text
+                  style={{
+                    textDecorationLine: "underline",
+                    textAlign: "center",
+                  }}
+                >
+                  Pet Type
+                </Card.Text>
+              </Col>
+              <Col>
+                <Card.Text
+                  style={{
+                    textDecorationLine: "underline",
+                    textAlign: "center",
+                  }}
+                >
+                  Pet Size
+                </Card.Text>
+              </Col>
+              <Col>
+                <Card.Text
+                  style={{
+                    textDecorationLine: "underline",
+                    textAlign: "center",
+                  }}
+                >
+                  Allowed?
+                </Card.Text>
+              </Col>
+              <Col>
+                <Card.Text
+                  style={{
+                    textDecorationLine: "underline",
+                    textAlign: "center",
+                  }}
+                >
+                  Reg. Fee
+                </Card.Text>
+              </Col>
+              <Col>
+                <Card.Text
+                  style={{
+                    textDecorationLine: "underline",
+                    textAlign: "center",
+                  }}
+                >
+                  Monthly Fee
+                </Card.Text>
+              </Col>
+              {petPolicy &&
+                petPolicy.policies.map((policy) => (
+                  <Row>
+                    <Col>
+                      <Card.Text style={{ textAlign: "center" }}>
+                        {policy[0]}
+                      </Card.Text>
+                    </Col>
+                    <Col>
+                      <Card.Text style={{ textAlign: "center" }}>
+                        {policy[1]}
+                      </Card.Text>
+                    </Col>
+                    <Col>
+                      <Card.Text style={{ textAlign: "center" }}>
+                        {policy[2]}
+                      </Card.Text>
+                    </Col>
+                    <Col>
+                      <Card.Text style={{ textAlign: "center" }}>
+                        {policy[3] ? (policy[3][0] == 1 ? "Yes" : "No") : "N/A"}
+                      </Card.Text>
+                    </Col>
+                    <Col>
+                      <Card.Text style={{ textAlign: "center" }}>
+                        {policy[3] ? `$${policy[3][2]}` : "N/A"}
+                      </Card.Text>
+                    </Col>
+                    <Col>
+                      <Card.Text style={{ textAlign: "center" }}>
+                        {policy[3] ? `$${policy[3][1]}` : "N/A"}
+                      </Card.Text>
+                    </Col>
+                  </Row>
+                ))}
+            </Row>
+          </ModalBody>
         </Modal>
       </div>
     </div>
