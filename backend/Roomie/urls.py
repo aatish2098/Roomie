@@ -34,17 +34,19 @@ urlpatterns = [
     path('<str:id>/getPets/',getPets, name='getPets'),
     path('<str:id>/addPet/', addPet, name='addPet'),
     path('<str:id>/editPet/', editPet, name='editPet'),
-    # path('<str:id>/<str:petName>/<str:petType>/', deletePet, name='deletePet'),
+    path('<str:id>/<str:petName>/<str:petType>/', deletePet, name='deletePet'),
     path('budgeting/', budgeting_view, name='budgeting_api'),
     path('listings/', listing_view, name='apartment_units'),
     path('advanced-search/', advanced_search, name='advanced_search'),
     path('<str:UnitRentID>/getInterests/', get_interest_view, name='interest_listing'),
     path('interests/', post_interest_view, name='interest_addition'),
+    path('searchInterest/', search_interest_view, name='searchInterest'),
     path('unit/<str:pk>/', detailedUnitInfo, name='detailedUnitInfo'),
     path('getPetPolicies/', getPetPolicies, name='getPetPolicies'),
     path('<str:username>/getFavourites/', get_favourite_view, name='get_favourite_view'),
     path('addFavourite/', add_favourite_view, name='favourite_add'),
     path('checkFav/', checkFav, name='checkFav'),
     path('<str:username>/<str:unitRentID>/delFavourite/', delFavourite, name='delFavourite'),
+
 ]
 

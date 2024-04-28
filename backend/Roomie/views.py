@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
 from django.http import JsonResponse
@@ -563,8 +565,11 @@ def get_favourite_view(request, username):
 
 @csrf_exempt
 @require_http_methods(["POST"])  # Allows only POST requests to this view.
-def add_favourite_view(request, username, unitRentID):
+def add_favourite_view(request):
     try:
+        data = json.loads(request.body)
+        username = data['username']
+        unitRentID = data['unitRentID']
         # Insert into the Favourite table
         with connection.cursor() as cursor:
             cursor.execute("""
@@ -641,6 +646,59 @@ def detailedUnitInfo(request, pk):
     except Exception as e:
         print(e)
         return Response({"message": str(e)})
+
+
+from django.http import JsonResponse
+from django.db import connection
+
+@csrf_exempt  # Exempt CSRF for demo purposes
+def search_interest_view(request):
+    if request.method == 'POST':
+        # Load data from POST body
+        data = json.loads(request.body)
+        unit_rent_id = data.get('UnitRentID')
+        roommate_count = data.get('roommateCnt')
+        move_in_date = data.get('moveInDate')
+
+        # Construct the SQL query
+        query = """
+        SELECT i.UnitRentID, i.MoveInDate, i.RoommateCnt, u.Phone, u.email, CONCAT(u.first_name, ' ', u.last_name) AS Name
+        FROM Interests i
+        JOIN Users u ON i.username = u.username
+        WHERE i.UnitRentID = %s
+        """
+
+        params = [unit_rent_id]
+
+
+        if roommate_count:
+            query += " AND i.RoommateCnt = %s"
+            params.append(roommate_count)
+
+
+        if move_in_date:
+            start_date = datetime.strptime(move_in_date, "%Y-%m-%d")
+            pre_date = start_date - timedelta(days=60)
+            post_date = start_date + timedelta(days=60)
+            query += " AND i.MoveInDate BETWEEN %s AND %s"
+            params.extend([pre_date.date(), post_date.date()])
+
+        # Execute the query
+        with connection.cursor() as cursor:
+            cursor.execute(query, params)
+            rows = cursor.fetchall()
+
+        # Format the results
+        results = [
+            {"unitRentID": row[0], "MoveInDate": row[1], "RoommateCount": row[2],
+             "PhoneNumber": row[3], "email": row[4], "Name": row[5]}
+            for row in rows
+        ]
+
+        return JsonResponse(results, safe=False)
+    else:
+        return JsonResponse({"error": "Invalid request"}, status=400)
+
 
 
 @csrf_exempt
@@ -723,3 +781,4 @@ def test(request, username, id, _):
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
     
+
