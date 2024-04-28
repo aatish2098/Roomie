@@ -5,8 +5,8 @@ import { useNavigate } from "react-router-dom";
 function ApartmentListings() {
   const navigate = useNavigate();
   const [inputs, setInputs] = useState({
-    BuildingName: "",
-    CompanyName: "",
+    BuildingName: "mary island",
+    CompanyName: "ramos inc",
     UnitNumber: "",
   });
   const [units, setUnits] = useState([]);
@@ -15,7 +15,6 @@ function ApartmentListings() {
     const { name, value } = e.target;
     setInputs((prev) => ({ ...prev, [name]: value }));
   };
-
 
   const listingRedirect = (e) => {
     navigate(`${e.target.name}/`);
@@ -154,7 +153,7 @@ function ApartmentListings() {
         </button>
       </form>
 
-      {units.length > 1 && (
+      {units.length > 1 ? (
         <ul style={styles.results}>
           {units.map((unit) => (
             <li key={unit.UnitRentID} style={styles.unit}>
@@ -174,10 +173,10 @@ function ApartmentListings() {
             </li>
           ))}
         </ul>
-      )}
-      {!units.length && (
+      ) : units.length != 0 ? (
         <ul style={styles.results}>
           <li key={units.UnitRentID} style={styles.unit}>
+            {console.log(units.length)}
             <div>Unit Number: {units.unitNumber}</div>
             <div>Monthly Rent: ${units.MonthlyRent}</div>
             <div>Square Footage: {units.squareFootage} sqft</div>
@@ -193,6 +192,8 @@ function ApartmentListings() {
             </button>
           </li>
         </ul>
+      ) : (
+        <></>
       )}
     </div>
   );

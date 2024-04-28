@@ -5,11 +5,17 @@ import { thunk } from "redux-thunk";
 import {
   userLoginReducers,
   userSignupReducers,
-  userSettingsReducers,
   userGetPetsReducers,
   userAddPetReducers,
+  userAddFavReducers,
+  userGetFavsReducers,
+  userCheckFavReducers,
+  userDelFavReducer,
 } from "../reducers/userReducers";
-import { unitViewReducer } from "../reducers/listingsReducers";
+import {
+  unitViewReducer,
+  unitPetPolicyReducer,
+} from "../reducers/listingsReducers";
 
 const reducer = combineReducers({
   userLogin: userLoginReducers,
@@ -17,6 +23,11 @@ const reducer = combineReducers({
   userPets: userGetPetsReducers,
   userAddPet: userAddPetReducers,
   unitDetails: unitViewReducer,
+  unitPetPolicy: unitPetPolicyReducer,
+  userAddFav: userAddFavReducers,
+  userGetFavs: userGetFavsReducers,
+  userCheckFav: userCheckFavReducers,
+  userDelFav: userDelFavReducer,
 });
 
 const initialState = {};

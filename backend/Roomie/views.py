@@ -7,7 +7,7 @@ from django.views.generic.edit import CreateView
 from django.shortcuts import render, redirect
 from django.db import connection
 from Roomie.forms import RegistrationForm
-from .forms import PetRegistrationForm
+from .forms import PetRegistrationForm, FavouriteForm
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes, parser_classes
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
@@ -124,7 +124,6 @@ def getPets(request, id):
 
         pets = cursor.fetchall()
 
-    print(pets)
     return Response({"pets": pets})
 
 
@@ -203,6 +202,28 @@ def deletePet(request, id, petName, petType):
     return Response({"message": "Pet successfully deleted."})
 
 
+@api_view(['POST'])
+def getPetPolicies(request):
+
+    companyName = request.data.get("CompanyName")
+    buildingName = request.data.get("BuildingName")
+    pets = request.data.get("pets")
+    policies = []
+    for pet in pets:
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT IsAllowed, MonthlyFee, RegistrationFee
+                FROM PetPolicy
+                WHERE CompanyName = %s AND BuildingName = %s AND PetType = %s AND PetSize = %s;
+                """, [companyName, buildingName, pet[1], pet[2]])
+
+            policy = cursor.fetchone()
+            policies.append((pet[0],pet[1], pet[2], policy))
+            # policies.append(policy)
+
+    return Response({"policies": policies})
+
+
 @csrf_exempt
 @require_http_methods(["POST"])
 def budgeting_view(request):
@@ -246,9 +267,6 @@ def listing_view(request):
         company_name = data.get('CompanyName')
         unit_number = data.get('UnitNumber')
 
-        print(building_name)
-        print(company_name)
-        print(unit_number)
         if not building_name or not company_name:
             return JsonResponse({'error': 'Missing BuildingName or CompanyName'}, status=400)
 
@@ -573,7 +591,6 @@ def detailedUnitInfo(request, pk):
                 """, [unitRentID])
             
             unitInfo = cursor.fetchone()
-        print(unitInfo)
 
         with connection.cursor() as cursor:
             cursor.execute("""
@@ -619,9 +636,90 @@ def detailedUnitInfo(request, pk):
             
             buildingAmenities = cursor.fetchall()
 
-        print(buildingInfo)
         return Response({"unitInfo": unitInfo, "unitAmenities": unitAmenities, "unitRooms": unitRooms, "buildingInfo": buildingInfo, "buildingAmenities": buildingAmenities})
 
     except Exception as e:
         print(e)
         return Response({"message": str(e)})
+
+
+@csrf_exempt
+@require_http_methods(["POST"])  # Allows only POST requests to this view.
+def add_favourite_view(request):
+    try:
+        data = json.loads(request.body)
+        username = data['username']
+        unitRentID = data['unitRentID']
+        # Insert into the Favourite table
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                INSERT INTO Favourite (username, UnitRentID)
+                VALUES (%s, %s)
+                ON DUPLICATE KEY UPDATE UnitRentID=UnitRentID;
+            """, [username, unitRentID])
+            connection.commit()
+        return JsonResponse({'status': 'success', 'message': 'Favourite added successfully.'}, status=201)
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+    
+
+@require_http_methods(["GET"])
+def get_favourite_view(request, username):
+    query = """
+        SELECT UnitRentID
+        FROM Favourite
+        WHERE username = %s;
+    """
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(query, [username])
+            unit_rent_ids = [row[0] for row in cursor.fetchall()]
+        return JsonResponse({'username': username, 'favourites': unit_rent_ids}, status=200)
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+    
+
+@api_view(['POST'])
+def checkFav(request):
+    username = request.data.get("username")
+    unitRentID = request.data.get("unitRentID")
+    query = """
+        SELECT *
+        FROM Favourite
+        WHERE username = %s AND UnitRentID = %s;
+    """
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(query, [username, unitRentID])
+            res = cursor.fetchone()
+        
+        if res:
+            return JsonResponse({'isFav': True}, status=200)
+        
+        return JsonResponse({'isFav': False}, status=200)
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+    
+
+@api_view(['DELETE'])
+# @permission_classes([IsAuthenticated])
+def delFavourite(request, username, unitRentID):
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            DELETE
+            FROM favourite
+            WHERE username = %s AND UnitRentID = %s;
+            """, [username, unitRentID])
+
+    return Response({"message": "Favourite successfully deleted."})
+
+
+@api_view(['GET'])
+def test(request, username, id, _):
+
+    try:
+        
+        return JsonResponse({'isFav': False}, status=200)
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+    
