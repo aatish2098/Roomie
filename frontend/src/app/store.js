@@ -11,6 +11,7 @@ import {
   userGetFavsReducers,
   userCheckFavReducers,
   userDelFavReducer,
+  userPostInterestReducers,
 } from "../reducers/userReducers";
 import {
   unitViewReducer,
@@ -28,6 +29,7 @@ const reducer = combineReducers({
   userGetFavs: userGetFavsReducers,
   userCheckFav: userCheckFavReducers,
   userDelFav: userDelFavReducer,
+  userPostInterest: userPostInterestReducers,
 });
 
 const initialState = {};

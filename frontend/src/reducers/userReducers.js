@@ -27,6 +27,9 @@ import {
   USER_DEL_FAV_REQUEST,
   USER_DEL_FAV_SUCCESS,
   USER_DEL_FAV_FAIL,
+  USER_POST_INT_REQUEST,
+  USER_POST_INT_SUCCESS,
+  USER_POST_INT_FAIL,
 } from "../constants/userConstants";
 
 export const userSignupReducers = (state = {}, action) => {
@@ -149,6 +152,19 @@ export const userDelFavReducer = (state = { favs: [] }, action) => {
         favs: action.payload,
       };
     case USER_DEL_FAV_FAIL:
+      return { loading: false, error: action.payload };
+    default:
+      return state;
+  }
+};
+
+export const userPostInterestReducers = (state = {}, action) => {
+  switch (action.type) {
+    case USER_POST_INT_REQUEST:
+      return { loading: true, ...state };
+    case USER_POST_INT_SUCCESS:
+      return { loading: false, fav: action.payload };
+    case USER_POST_INT_FAIL:
       return { loading: false, error: action.payload };
     default:
       return state;

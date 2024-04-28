@@ -6,7 +6,13 @@ import {
   fetchListingDetails,
   getPetPolicies,
 } from "../actions/listingsActions";
-import { getPets, addFav, checkFav, delFav } from "../actions/userActions";
+import {
+  getPets,
+  addFav,
+  checkFav,
+  delFav,
+  postInterest,
+} from "../actions/userActions";
 import {
   Container,
   Row,
@@ -40,9 +46,10 @@ function ViewListingScreen({ params }) {
   const [flag, setFlag] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [showPetModal, setShowPetModal] = useState(false);
-  // const [favorited, setFavorited] = useState(false);
+  const [moveDate, setMoveDate] = useState("");
+  const [roommateCount, setRoommateCount] = useState(0);
   // console.log(unitDetails);
-  console.log(isFav);
+
   const handleToggleModal = () => {
     setShowModal(!showModal);
   };
@@ -54,6 +61,15 @@ function ViewListingScreen({ params }) {
   const loadPolicies = () => {
     dispatch(getPetPolicies(buildingInfo[0], buildingInfo[1], pets.pets));
     setShowPetModal(!showPetModal);
+  };
+
+  const redirectInterests = () => {
+    navigate(`/interests/${id}`);
+  };
+
+  const submitInterest = () => {
+    dispatch(postInterest(userInfo.username, id, roommateCount, moveDate));
+    // setTimeout(handleToggleModal, 500);
   };
 
   const handleFav = () => {
@@ -126,11 +142,21 @@ function ViewListingScreen({ params }) {
                           Remove From Favorites
                         </Button>
                       )}
+                      {userInfo && (
+                        <Button
+                          variant="info"
+                          className="m-3"
+                          style={{ fontSize: "75%", borderRadius: "7px" }}
+                          onClick={handleToggleModal}
+                        >
+                          Post Interest
+                        </Button>
+                      )}
                       <Button
                         variant="info"
-                        className="m-3"
+                        className=""
                         style={{ fontSize: "75%", borderRadius: "7px" }}
-                        onClick={handleToggleModal}
+                        onClick={redirectInterests}
                       >
                         View Interests
                       </Button>
@@ -280,7 +306,7 @@ function ViewListingScreen({ params }) {
             </Modal.Title>
           </Modal.Header>
           <ModalBody style={{ backgroundColor: "#fffaf0" }}>
-            <Form style={{ color: "black" }}>
+            <Form onSubmit={submitInterest} style={{ color: "black" }}>
               <Form.Group className="mb-3" controlId="petName">
                 <Form.Label>Move-In Date</Form.Label>
                 &nbsp;
@@ -290,10 +316,9 @@ function ViewListingScreen({ params }) {
                 ></i>
                 <Form.Control
                   type="date"
-                  // value={petName}
-                  // onChange={(e) => setPetName(e.target.value)}
+                  value={moveDate}
+                  onChange={(e) => setMoveDate(e.target.value)}
                   required
-                  autoFocus
                 />
               </Form.Group>
               <Form.Group className="mb-3" controlId="petName">
@@ -305,31 +330,30 @@ function ViewListingScreen({ params }) {
                 ></i>
                 <Form.Control
                   type="number"
-                  // value={petType}
-                  // onChange={(e) => setPetType(e.target.value)}
+                  value={roommateCount}
+                  onChange={(e) => setRoommateCount(e.target.value)}
                   required
                 ></Form.Control>
               </Form.Group>
+              <Modal.Footer style={{ backgroundColor: "#fffaf0" }}>
+                <Button
+                  variant="danger"
+                  onClick={handleToggleModal}
+                  style={{ borderRadius: "5px" }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  className="btn btn-md btn-success"
+                  variant="info"
+                  style={{ borderRadius: "5px" }}
+                >
+                  Submit Interest
+                </Button>
+              </Modal.Footer>
             </Form>
           </ModalBody>
-          <Modal.Footer style={{ backgroundColor: "#fffaf0" }}>
-            <Button
-              variant="danger"
-              onClick={handleToggleModal}
-              style={{ borderRadius: "5px" }}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              className="btn btn-md btn-success"
-              variant="info"
-              // onClick={submitHandler}
-              style={{ borderRadius: "5px" }}
-            >
-              Submit Interest
-            </Button>
-          </Modal.Footer>
         </Modal>
         <Modal
           centered={true}

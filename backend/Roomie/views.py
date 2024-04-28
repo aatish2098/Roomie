@@ -19,7 +19,6 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser
 import json
 from .serializers import *
 
-
 @api_view(['POST'])
 def register(request):
     if request.method == 'POST':
@@ -192,7 +191,6 @@ def editPet(request, id):
 @api_view(['DELETE'])
 # @permission_classes([IsAuthenticated])
 def deletePet(request, id, petName, petType):
-    print(request)
     username = id
     with connection.cursor() as cursor:
         cursor.execute("""
@@ -326,6 +324,7 @@ def listing_view(request):
         return JsonResponse({'error': str(e)}, status=500)
 
 
+@api_view(["POST"])
 @csrf_exempt  # Use this decorator to exempt this view from CSRF verification.
 @require_http_methods(["POST"])
 def advanced_search(request):
@@ -474,6 +473,9 @@ def advanced_search(request):
         } for row in rows
     ]
 
+    if len(response_data) == 0:
+        return Response({"message": response_data})
+    
     return JsonResponse(response_data, safe=False)
 
 @require_http_methods(["GET"])
@@ -513,6 +515,7 @@ def get_interest_view(request, UnitRentID):
         for result in results
     ]
 
+    
     return JsonResponse(formatted_results, safe=False)
 
 
@@ -648,8 +651,7 @@ def detailedUnitInfo(request, pk):
         return Response({"message": str(e)})
 
 
-from django.http import JsonResponse
-from django.db import connection
+
 
 @csrf_exempt  # Exempt CSRF for demo purposes
 def search_interest_view(request):
@@ -701,40 +703,6 @@ def search_interest_view(request):
 
 
 
-@csrf_exempt
-@require_http_methods(["POST"])  # Allows only POST requests to this view.
-def add_favourite_view(request):
-    try:
-        data = json.loads(request.body)
-        username = data['username']
-        unitRentID = data['unitRentID']
-        # Insert into the Favourite table
-        with connection.cursor() as cursor:
-            cursor.execute("""
-                INSERT INTO Favourite (username, UnitRentID)
-                VALUES (%s, %s)
-                ON DUPLICATE KEY UPDATE UnitRentID=UnitRentID;
-            """, [username, unitRentID])
-            connection.commit()
-        return JsonResponse({'status': 'success', 'message': 'Favourite added successfully.'}, status=201)
-    except Exception as e:
-        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
-    
-
-@require_http_methods(["GET"])
-def get_favourite_view(request, username):
-    query = """
-        SELECT UnitRentID
-        FROM Favourite
-        WHERE username = %s;
-    """
-    try:
-        with connection.cursor() as cursor:
-            cursor.execute(query, [username])
-            unit_rent_ids = [row[0] for row in cursor.fetchall()]
-        return JsonResponse({'username': username, 'favourites': unit_rent_ids}, status=200)
-    except Exception as e:
-        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
     
 
 @api_view(['POST'])
@@ -759,9 +727,12 @@ def checkFav(request):
         return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
     
 
-@api_view(['DELETE'])
+@api_view(['POST'])
 # @permission_classes([IsAuthenticated])
-def delFavourite(request, username, unitRentID):
+def delFavourite(request):
+    username = request.data.get("username")
+    unitRentID = request.data.get("unitRentID")
+    print(username, unitRentID)
     with connection.cursor() as cursor:
         cursor.execute("""
             DELETE
@@ -771,14 +742,4 @@ def delFavourite(request, username, unitRentID):
 
     return Response({"message": "Favourite successfully deleted."})
 
-
-@api_view(['GET'])
-def test(request, username, id, _):
-
-    try:
-        
-        return JsonResponse({'isFav': False}, status=200)
-    except Exception as e:
-        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
-    
 

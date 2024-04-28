@@ -32,6 +32,9 @@ import {
   USER_DEL_FAV_REQUEST,
   USER_DEL_FAV_SUCCESS,
   USER_DEL_FAV_FAIL,
+  USER_POST_INT_REQUEST,
+  USER_POST_INT_SUCCESS,
+  USER_POST_INT_FAIL,
 } from "../constants/userConstants";
 
 // axios.defaults.headers.post["Access-Control-Allow-Origin"] = "*";
@@ -366,9 +369,20 @@ export const delFav = (username, unitRentID) => async (dispatch) => {
       type: USER_DEL_FAV_REQUEST,
     });
 
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    };
+
     console.log(username);
-    const { data } = await axios.delete(
-      `http://127.0.0.1:8000/${username}/${unitRentID}/delFavourite/`
+    const { data } = await axios.post(
+      `http://127.0.0.1:8000/delFavourite/`,
+      {
+        username: username,
+        unitRentID: unitRentID,
+      },
+      config
     );
 
     dispatch({
@@ -385,3 +399,44 @@ export const delFav = (username, unitRentID) => async (dispatch) => {
     });
   }
 };
+
+export const postInterest =
+  (username, unitRentID, roommateCount, MoveInDate) => async (dispatch) => {
+    try {
+      dispatch({
+        type: USER_POST_INT_REQUEST,
+      });
+
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      };
+
+      console.log(username, unitRentID, roommateCount, MoveInDate);
+
+      const { data } = await axios.post(
+        "http://127.0.0.1:8000/interests/",
+        {
+          username: username,
+          unitRentID: unitRentID,
+          roommateCount: roommateCount,
+          MoveInDate: MoveInDate,
+        },
+        config
+      );
+
+      dispatch({
+        type: USER_POST_INT_SUCCESS,
+        payload: data,
+      });
+    } catch (error) {
+      dispatch({
+        type: USER_POST_INT_FAIL,
+        payload:
+          error.response && error.response.data.detail
+            ? error.response.data.detail
+            : error.message,
+      });
+    }
+  };

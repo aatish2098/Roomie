@@ -5,8 +5,8 @@ import { useNavigate } from "react-router-dom";
 function ApartmentListings() {
   const navigate = useNavigate();
   const [inputs, setInputs] = useState({
-    BuildingName: "mary island",
-    CompanyName: "ramos inc",
+    BuildingName: "",
+    CompanyName: "",
     UnitNumber: "",
   });
   const [units, setUnits] = useState([]);

@@ -11,6 +11,7 @@ import FavoritesScreen from "./screens/FavoritesScreen";
 import PetsScreen from "./screens/PetsScreen";
 import ViewListingScreen from "./screens/ViewListingScreen";
 import AdvancedSearchScreen from "./screens/AdvancedSearchScreen";
+import SearchInterest from "./screens/SearchInterest";
 
 export default function App() {
   return (
@@ -28,6 +29,11 @@ export default function App() {
             element={<FavoritesScreen />}
           ></Route>
           <Route exact path="/budgeting" element={<Budgeting />} />
+          <Route
+            exact
+            path="/interests/:unitRentID"
+            element={<SearchInterest />}
+          />
           <Route exact path="/login" element={<LoginScreen />}></Route>
           <Route path="/profile/:id" element={<PetsScreen />} />
           <Route
