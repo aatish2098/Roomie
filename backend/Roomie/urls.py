@@ -43,5 +43,6 @@ urlpatterns = [
     path('<str:username>/getFavourite/', get_favourite_view, name='favourite_listing'),
     path('addFavourite/', add_favourite_view, name='favourite_add'),
     path('unit/<str:pk>/', detailedUnitInfo, name='detailedUnitInfo'),
+    path('searchInterest/', search_interest_view, name='searchInterest'),
 ]
 
