@@ -15,6 +15,21 @@ import {
   USER_DELETE_PET_REQUEST,
   USER_DELETE_PET_SUCCESS,
   USER_DELETE_PET_FAIL,
+  USER_FAV_REQUEST,
+  USER_FAV_SUCCESS,
+  USER_FAV_FAIL,
+  USER_GET_FAVS_REQUEST,
+  USER_GET_FAVS_SUCCESS,
+  USER_GET_FAVS_FAIL,
+  USER_CHECK_FAV_REQUEST,
+  USER_CHECK_FAV_SUCCESS,
+  USER_CHECK_FAV_FAIL,
+  USER_DEL_FAV_REQUEST,
+  USER_DEL_FAV_SUCCESS,
+  USER_DEL_FAV_FAIL,
+  USER_POST_INT_REQUEST,
+  USER_POST_INT_SUCCESS,
+  USER_POST_INT_FAIL,
 } from "../constants/userConstants";
 
 export const userSignupReducers = (state = {}, action) => {
@@ -81,7 +96,75 @@ export const userDeletePetReducer = (state = { pets: [] }, action) => {
         loading: false,
         pets: action.payload,
       };
-    case USER_ADD_PET_FAIL:
+    case USER_DELETE_PET_FAIL:
+      return { loading: false, error: action.payload };
+    default:
+      return state;
+  }
+};
+
+export const userAddFavReducers = (state = {}, action) => {
+  switch (action.type) {
+    case USER_FAV_REQUEST:
+      return { loading: true, ...state };
+    case USER_FAV_SUCCESS:
+      return { loading: false, fav: action.payload };
+    case USER_FAV_FAIL:
+      return { loading: false, error: action.payload };
+    default:
+      return state;
+  }
+};
+
+export const userGetFavsReducers = (state = { favs: [] }, action) => {
+  switch (action.type) {
+    case USER_GET_FAVS_REQUEST:
+      return { loading: true, ...state };
+    case USER_GET_FAVS_SUCCESS:
+      return { loading: false, favs: action.payload };
+    case USER_GET_FAVS_FAIL:
+      return { loading: false, error: action.payload };
+    default:
+      return state;
+  }
+};
+
+export const userCheckFavReducers = (state = {}, action) => {
+  switch (action.type) {
+    case USER_CHECK_FAV_REQUEST:
+      return { loading: true, ...state };
+    case USER_CHECK_FAV_SUCCESS:
+      return { loading: false, isFav: action.payload };
+    case USER_CHECK_FAV_FAIL:
+      return { loading: false, error: action.payload };
+    default:
+      return state;
+  }
+};
+
+export const userDelFavReducer = (state = { favs: [] }, action) => {
+  switch (action.type) {
+    case USER_DEL_FAV_REQUEST:
+      return { loading: true, ...state };
+    case USER_DEL_FAV_SUCCESS:
+      return {
+        loading: false,
+        favs: action.payload,
+      };
+    case USER_DEL_FAV_FAIL:
+      return { loading: false, error: action.payload };
+    default:
+      return state;
+  }
+};
+
+export const userPostInterestReducers = (state = {}, action) => {
+  switch (action.type) {
+    case USER_POST_INT_REQUEST:
+      return { loading: true, ...state };
+    case USER_POST_INT_SUCCESS:
+      return { loading: false, fav: action.payload };
+    case USER_POST_INT_FAIL:
       return { loading: false, error: action.payload };
     default:
       return state;
