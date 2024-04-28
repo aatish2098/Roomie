@@ -44,5 +44,7 @@ urlpatterns = [
     path('addFavourite/', add_favourite_view, name='favourite_add'),
     path('unit/<str:pk>/', detailedUnitInfo, name='detailedUnitInfo'),
     path('searchInterest/', search_interest_view, name='searchInterest'),
+    path('add_comment/', add_comment, name='add_comment'),
+    path('get_comments/', get_comments, name='get_comments'),
 ]
 

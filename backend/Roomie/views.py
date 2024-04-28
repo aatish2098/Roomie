@@ -682,3 +682,47 @@ def search_interest_view(request):
     else:
         return JsonResponse({"error": "Invalid request"}, status=400)
 
+@csrf_exempt  # Exempt CSRF for demo purposes
+@require_http_methods(["POST"])  # Ensure this matches with 'GET' only
+def add_comment(request):
+    try:
+        data = json.loads(request.body)
+        unitRentID = data.get('unitRentID')
+        username = data.get('username')
+        content = data.get('content')
+
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                INSERT INTO comments (UnitRentID, Username, Content) 
+                VALUES (%s, %s, %s)
+            """, [unitRentID, username, content]
+            )
+        return JsonResponse({"message": "comment added"})
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=400)
+
+@csrf_exempt  # Exempt CSRF for demo purposes
+@require_http_methods(["POST"])  # Ensure this matches with 'GET' only
+def get_comments(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        unitRentID = data.get('unitRentID')
+        username = data.get('username')
+        content = data.get('content')
+
+
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM comments WHERE unitRentID = %s", [unitRentID])
+            rows = cursor.fetchall()
+        comments = [
+            {
+                'CommentID': row[0],
+                'UnitRentID': row[1],
+                'Username': row[2],
+                'Content': row[3],
+                'CreatedAt': row[4].strftime('%Y-%m-%d %H:%M:%S') if row[3] else None
+            } for row in rows
+        ]
+        return JsonResponse({"comments": comments})
+
+
