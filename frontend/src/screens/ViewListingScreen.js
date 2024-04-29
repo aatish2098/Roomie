@@ -5,6 +5,7 @@ import { useAsyncError, useParams } from "react-router-dom";
 import {
   fetchListingDetails,
   getPetPolicies,
+  getComments,
 } from "../actions/listingsActions";
 import {
   getPets,
@@ -12,6 +13,7 @@ import {
   checkFav,
   delFav,
   postInterest,
+  postComment,
 } from "../actions/userActions";
 import {
   Container,
@@ -43,12 +45,20 @@ function ViewListingScreen({ params }) {
   const { errorPolicy, loadingPolicy, petPolicy } = unitPetPolicy;
   const userCheckFav = useSelector((state) => state.userCheckFav);
   const { errorFav, loadingFav, isFav } = userCheckFav;
+  const unitComments = useSelector((state) => state.unitComments);
+  const { errorComments, loadingComments, comments } = unitComments;
+  let commentHistory = null;
+  if (comments) {
+    commentHistory = comments.comments;
+  }
   const [flag, setFlag] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [showPetModal, setShowPetModal] = useState(false);
   const [moveDate, setMoveDate] = useState("");
   const [roommateCount, setRoommateCount] = useState(0);
-  // console.log(unitDetails);
+  const [comment, setComment] = useState("");
+  // console.log(pets);
+  console.log(commentHistory);
 
   const handleToggleModal = () => {
     setShowModal(!showModal);
@@ -77,6 +87,10 @@ function ViewListingScreen({ params }) {
     setFlag(!flag);
   };
 
+  const submitComment = () => {
+    dispatch(postComment(userInfo.username, id, comment));
+  };
+
   const handleRemoveFav = () => {
     dispatch(delFav(userInfo.username, id));
     setFlag(!flag);
@@ -86,6 +100,7 @@ function ViewListingScreen({ params }) {
     if (userInfo) {
       dispatch(checkFav(userInfo.username, id));
       dispatch(getPets(userInfo.username));
+      dispatch(getComments(id));
     }
     dispatch(fetchListingDetails(id));
   }, [dispatch, flag]);
@@ -96,8 +111,6 @@ function ViewListingScreen({ params }) {
   const buildingInfo =
     unitDetails.length != 0 ? unitDetails.buildingInfo[0] : null;
   const buildingAmenities = unitDetails.buildingAmenities;
-
-  // console.log(petPolicy);
 
   return (
     <div>
@@ -282,6 +295,56 @@ function ViewListingScreen({ params }) {
                 <Card.Text className="mt-4">&nbsp;</Card.Text>
               </Col>
             </Row>
+          </Card>
+          <Card
+            className="my-4"
+            bg="primary"
+            style={{
+              color: "white",
+              borderRadius: "10px",
+              border: "4px solid white",
+            }}
+          >
+            <Card.Body>
+              <Card.Text style={{ fontSize: "150%", fontWeight: "bold" }}>
+                Comment History
+              </Card.Text>
+              <Row>
+                {userInfo && (
+                  <Form>
+                    <Form.Group className="mb-3" controlId="lname">
+                      <Form.Label>Post Comment</Form.Label>
+                      <Form.Control
+                        as="textarea"
+                        type="text"
+                        placeholder="Enter a comment..."
+                        value={comment}
+                        onChange={(e) => setComment(e.target.value)}
+                        required
+                      />
+                    </Form.Group>
+                    <Button
+                      variant="info"
+                      style={{ fontSize: "75%", borderRadius: "7px" }}
+                      onClick={submitComment}
+                    >
+                      Upload Comment
+                    </Button>
+                  </Form>
+                )}
+              </Row>
+              <Row className="mt-3">
+                {commentHistory &&
+                  commentHistory.map((comment) => (
+                    <Card.Text>
+                      <span style={{ fontWeight: "bold", color: "#e3b3ff" }}>
+                        {comment[0]}:
+                      </span>{" "}
+                      {comment[2]}
+                    </Card.Text>
+                  ))}
+              </Row>
+            </Card.Body>
           </Card>
         </Container>
 

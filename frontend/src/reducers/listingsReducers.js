@@ -5,6 +5,9 @@ import {
   UNIT_VIEW_PET_POLICIES_REQUEST,
   UNIT_VIEW_PET_POLICIES_SUCCESS,
   UNIT_VIEW_PET_POLICIES_FAIL,
+  UNIT_VIEW_COMM_REQUEST,
+  UNIT_VIEW_COMM_SUCCESS,
+  UNIT_VIEW_COMM_FAIL,
 } from "../constants/listingsConstants";
 
 export const unitViewReducer = (state = { unitDetails: [] }, action) => {
@@ -30,6 +33,22 @@ export const unitPetPolicyReducer = (
     case UNIT_VIEW_PET_POLICIES_SUCCESS:
       return { loading: false, petPolicy: action.payload };
     case UNIT_VIEW_PET_POLICIES_FAIL:
+      return { loading: false, error: action.payload };
+    default:
+      return state;
+  }
+};
+
+export const unitCommentsReducer = (
+  state = { comments: undefined },
+  action
+) => {
+  switch (action.type) {
+    case UNIT_VIEW_COMM_REQUEST:
+      return { loading: true, ...state };
+    case UNIT_VIEW_COMM_SUCCESS:
+      return { loading: false, comments: action.payload };
+    case UNIT_VIEW_COMM_FAIL:
       return { loading: false, error: action.payload };
     default:
       return state;

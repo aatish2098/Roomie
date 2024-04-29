@@ -30,6 +30,9 @@ import {
   USER_POST_INT_REQUEST,
   USER_POST_INT_SUCCESS,
   USER_POST_INT_FAIL,
+  USER_POST_COMM_REQUEST,
+  USER_POST_COMM_SUCCESS,
+  USER_POST_COMM_FAIL,
 } from "../constants/userConstants";
 
 export const userSignupReducers = (state = {}, action) => {
@@ -165,6 +168,19 @@ export const userPostInterestReducers = (state = {}, action) => {
     case USER_POST_INT_SUCCESS:
       return { loading: false, fav: action.payload };
     case USER_POST_INT_FAIL:
+      return { loading: false, error: action.payload };
+    default:
+      return state;
+  }
+};
+
+export const userPostCommentReducers = (state = {}, action) => {
+  switch (action.type) {
+    case USER_POST_COMM_REQUEST:
+      return { loading: true, ...state };
+    case USER_POST_COMM_SUCCESS:
+      return { loading: false, comment: action.payload };
+    case USER_POST_COMM_FAIL:
       return { loading: false, error: action.payload };
     default:
       return state;

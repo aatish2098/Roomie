@@ -35,6 +35,9 @@ import {
   USER_POST_INT_REQUEST,
   USER_POST_INT_SUCCESS,
   USER_POST_INT_FAIL,
+  USER_POST_COMM_REQUEST,
+  USER_POST_COMM_SUCCESS,
+  USER_POST_COMM_FAIL,
 } from "../constants/userConstants";
 
 // axios.defaults.headers.post["Access-Control-Allow-Origin"] = "*";
@@ -433,6 +436,46 @@ export const postInterest =
     } catch (error) {
       dispatch({
         type: USER_POST_INT_FAIL,
+        payload:
+          error.response && error.response.data.detail
+            ? error.response.data.detail
+            : error.message,
+      });
+    }
+  };
+
+export const postComment =
+  (username, unitRentID, comment) => async (dispatch) => {
+    try {
+      dispatch({
+        type: USER_POST_COMM_REQUEST,
+      });
+
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      };
+
+      console.log(username, unitRentID, comment);
+
+      const { data } = await axios.post(
+        "http://127.0.0.1:8000/postComment/",
+        {
+          username: username,
+          unitRentID: unitRentID,
+          comment: comment,
+        },
+        config
+      );
+
+      dispatch({
+        type: USER_POST_COMM_SUCCESS,
+        payload: data,
+      });
+    } catch (error) {
+      dispatch({
+        type: USER_POST_COMM_FAIL,
         payload:
           error.response && error.response.data.detail
             ? error.response.data.detail

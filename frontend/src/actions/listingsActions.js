@@ -12,6 +12,9 @@ import {
   UNIT_VIEW_PET_POLICIES_REQUEST,
   UNIT_VIEW_PET_POLICIES_SUCCESS,
   UNIT_VIEW_PET_POLICIES_FAIL,
+  UNIT_VIEW_COMM_REQUEST,
+  UNIT_VIEW_COMM_SUCCESS,
+  UNIT_VIEW_COMM_FAIL,
 } from "../constants/listingsConstants";
 
 export const fetchListings = () => async (dispatch) => {
@@ -104,3 +107,35 @@ export const getPetPolicies =
       });
     }
   };
+
+export const getComments = (unitRentID) => async (dispatch) => {
+  try {
+    dispatch({ type: UNIT_VIEW_COMM_REQUEST });
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    };
+
+    const { data } = await axios.post(
+      `http://127.0.0.1:8000/getComments/`,
+      {
+        unitRentID: unitRentID,
+      },
+      config
+    );
+
+    dispatch({
+      type: UNIT_VIEW_COMM_SUCCESS,
+      payload: data,
+    });
+  } catch (error) {
+    dispatch({
+      type: UNIT_VIEW_COMM_FAIL,
+      payload:
+        error.response && error.response.data.detail
+          ? error.response.data.detail
+          : error.message,
+    });
+  }
+};

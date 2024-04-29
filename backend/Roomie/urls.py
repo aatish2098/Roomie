@@ -47,6 +47,8 @@ urlpatterns = [
     path('addFavourite/', add_favourite_view, name='favourite_add'),
     path('checkFav/', checkFav, name='checkFav'),
     path('delFavourite/', delFavourite, name='delFavourite'),
+    path('postComment/', postComment, name='postComment'),
+    path('getComments/', getComments, name='getComments'),
 
 ]
 
