@@ -85,9 +85,6 @@ function Budgeting() {
 
 const handleSubmit = async (e) => {
   e.preventDefault();
-console.log("Checking for CSRF token...");
-const csrfToken = Cookies.get('csrftoken');
-console.log(document.cookie);
 
 
   try {
@@ -95,8 +92,7 @@ console.log(document.cookie);
       method: 'POST',
       credentials: 'include',
       headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': csrfToken
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
         zipcode: formData.zipcode,
