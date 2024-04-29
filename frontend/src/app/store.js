@@ -12,10 +12,12 @@ import {
   userCheckFavReducers,
   userDelFavReducer,
   userPostInterestReducers,
+  userPostCommentReducers,
 } from "../reducers/userReducers";
 import {
   unitViewReducer,
   unitPetPolicyReducer,
+  unitCommentsReducer,
 } from "../reducers/listingsReducers";
 
 const reducer = combineReducers({
@@ -30,6 +32,8 @@ const reducer = combineReducers({
   userCheckFav: userCheckFavReducers,
   userDelFav: userDelFavReducer,
   userPostInterest: userPostInterestReducers,
+  userPostComment: userPostCommentReducers,
+  unitComments: unitCommentsReducer,
 });
 
 const initialState = {};

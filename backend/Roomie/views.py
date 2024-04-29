@@ -83,6 +83,11 @@ def register(request):
         return Response(response_data)
 
 
+# @api_view(['POST'])
+# def login(request):
+#    username = request.data.get('username')
+#    password = request.data.get('password')
+
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         data = super().validate(attrs)
@@ -743,3 +748,38 @@ def delFavourite(request):
     return Response({"message": "Favourite successfully deleted."})
 
 
+@csrf_exempt
+@api_view(["POST"])
+def postComment(request):
+    try:
+        username = request.data.get('username')
+        unitRentID = request.data.get('unitRentID')
+        comment = request.data.get('comment')
+        # Insert into the Favourite table
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                INSERT INTO Comments (username, UnitRentID, comment)
+                VALUES (%s, %s, %s)
+            """, [username, unitRentID, comment])
+            
+
+
+        return JsonResponse({'status': 'success', 'message': 'Comment posted successfully.'}, status=201)
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+
+@api_view(['POST'])
+def getComments(request):
+    unitRentID = request.data.get('unitRentID')
+
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT *
+            FROM comments
+            WHERE UnitRentID = %s
+            """, [unitRentID])
+
+        comments = cursor.fetchall()
+
+    return Response({"comments": comments})
