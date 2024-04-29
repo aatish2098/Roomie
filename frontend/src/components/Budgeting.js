@@ -83,49 +83,61 @@ function Budgeting() {
     setFormData({...formData, [e.target.name]: e.target.value});
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const response = await fetch('http://127.0.0.1:8000/budgeting/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          zipcode: formData.zipcode,
-          numBathrooms: formData.numBathrooms,
-          numBedrooms: formData.numRooms,
-        })
-      });
-      const data = await response.json();
-      if (data.status === 'success') {
-        const averageRent = Math.floor(+data.data.averageRent);
-        setResult(`Here's your average monthly rent for Zipcode ${data.data.zipcode} with ${data.data.numBathrooms} bathroom(s) and ${data.data.numBedrooms} bedroom(s): ${averageRent}`);
+const handleSubmit = async (e) => {
+  e.preventDefault();
+console.log("Checking for CSRF token...");
+const csrfToken = Cookies.get('csrftoken');
+console.log(document.cookie);
+
+
+  try {
+    const response = await fetch('http://127.0.0.1:8000/budgeting/', {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrfToken
+      },
+      body: JSON.stringify({
+        zipcode: formData.zipcode,
+        numBathrooms: formData.numBathrooms,
+        numBedrooms: formData.numRooms,
+      })
+    });
+    const data = await response.json();
+    if (data.status === 'success') {
+      const averageRent = Math.floor(+data.data.averageRent);
+      if (averageRent === 0) {
+        setResult(`The selected zipcode doesn't have units with ${formData.numBathrooms} bathroom(s) and ${formData.numRooms} bedroom(s). Try a different combination.`);
         setError('');
       } else {
-        setError(data.message || 'An error occurred');
-        setResult('');
+        setResult(`Here's your average monthly rent for Zipcode ${data.data.zipcode} with ${data.data.numBathrooms} bathroom(s) and ${data.data.numBedrooms} bedroom(s): ${averageRent}`);
+        setError('');
       }
-    } catch (err) {
-      setError('Failed to fetch data');
+    } else {
+      setError(data.message || 'An error occurred');
       setResult('');
     }
-  };
+  } catch (err) {
+    setError('Failed to fetch data');
+    setResult('');
+  }
+};
 
   return (
     <Container>
       <Form onSubmit={handleSubmit}>
         <Label>
           Zipcode:
-          <Input type="text" name="zipcode" value={formData.zipcode} onChange={handleChange} />
+          <Input type="text" name="zipcode" value={formData.zipcode} onChange={handleChange} required />
         </Label>
         <Label>
           Number of Rooms:
-          <Input type="number" name="numRooms" value={formData.numRooms} onChange={handleChange} />
+          <Input type="number" name="numRooms" value={formData.numRooms} onChange={handleChange} required />
         </Label>
         <Label>
           Number of Bathrooms:
-          <Input type="number" name="numBathrooms" value={formData.numBathrooms} onChange={handleChange} />
+          <Input type="number" name="numBathrooms" value={formData.numBathrooms} onChange={handleChange} required />
         </Label>
         <Button type="submit">Submit</Button>
         {result && <Result>{result}</Result>}
