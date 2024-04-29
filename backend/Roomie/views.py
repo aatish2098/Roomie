@@ -701,8 +701,10 @@ def search_interest_view(request):
              "PhoneNumber": row[3], "email": row[4], "Name": row[5]}
             for row in rows
         ]
-
-        return JsonResponse(results, safe=False)
+        if results:
+            return JsonResponse(results, safe=False)
+        else:
+            return JsonResponse({"status":"No Results Found."},status=200)
     else:
         return JsonResponse({"error": "Invalid request"}, status=400)
 
