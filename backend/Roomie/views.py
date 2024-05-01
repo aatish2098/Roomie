@@ -55,7 +55,7 @@ def register(request):
                 userNameExists = cursor.fetchone()
 
             if userNameExists:
-                response_data = {'message': "Invalid Credentials: Username Possibly Already Taken"}
+                response_data = {'message': "Username Already Taken"}
                 return Response(response_data)
 
             # Create New User Object

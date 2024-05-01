@@ -52,7 +52,10 @@ function SignUpScreen() {
       dispatch(
         signup(username, fname, lname, email, pass1, pass2, dob, gender, phone)
       );
-      navigate("/login");
+      if (userInfo && !userInfo.hasOwnProperty("message")){
+        navigate("/login");
+      }
+
     }
   };
 

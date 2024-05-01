@@ -19,7 +19,7 @@ export default function App() {
       <Router>
         <Header />
         <Routes>
-          <Route exact path="/" element={<HomeScreen />}></Route>
+          <Route exact path="/" element={<LoginScreen />}></Route>
           <Route exact path="/listings" element={<ListingsScreen />}></Route>
           <Route exact path="/unit/:id" element={<ViewListingScreen />}></Route>
           <Route exact path="/signup" element={<SignUpScreen />}></Route>
