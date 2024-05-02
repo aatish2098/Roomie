@@ -37,25 +37,21 @@ function SignUpScreen() {
   const { error, loading, userInfo } = userSignup;
 
   useEffect(() => {
-    if (userInfo) {
-      // navigate("/");
+    if (userInfo && userInfo["message"] === "User created successfully") {
+      navigate("/login");
+    } else if (userInfo && userInfo["message"] === "Username Already Taken") {
+      setMessage(userInfo["message"]);
     }
-    // setMessage("")
-  }, [userInfo, error, redirect]);
+  }, [userInfo, error, redirect, dispatch]);
 
   const submitHandler = (e) => {
     e.preventDefault();
     if (pass1 !== pass2) {
       setMessage("Passwords do not match");
-      // navigate("/signup");
     } else {
       dispatch(
         signup(username, fname, lname, email, pass1, pass2, dob, gender, phone)
       );
-      if (userInfo && !userInfo.hasOwnProperty("message")){
-        navigate("/login");
-      }
-
     }
   };
 

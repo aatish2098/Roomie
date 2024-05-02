@@ -57,6 +57,7 @@ function ViewListingScreen({ params }) {
   const [moveDate, setMoveDate] = useState("");
   const [roommateCount, setRoommateCount] = useState(0);
   const [comment, setComment] = useState("");
+  const [commentFlag, setCommentFlag] = useState(false);
   // console.log(pets);
   console.log(commentHistory);
 
@@ -89,6 +90,8 @@ function ViewListingScreen({ params }) {
 
   const submitComment = () => {
     dispatch(postComment(userInfo.username, id, comment));
+    setCommentFlag(!commentFlag);
+    setComment("");
   };
 
   const handleRemoveFav = () => {
@@ -103,7 +106,7 @@ function ViewListingScreen({ params }) {
       dispatch(getComments(id));
     }
     dispatch(fetchListingDetails(id));
-  }, [dispatch, flag]);
+  }, [dispatch, flag, commentFlag]);
 
   const apt = unitDetails.unitInfo;
   const aptAmenities = unitDetails.unitAmenities;

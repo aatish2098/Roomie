@@ -29,7 +29,7 @@ function LoginScreen() {
 
   useEffect(() => {
     if (userInfo) {
-      navigate("/");
+      navigate("/listings");
     }
   }, [userInfo, redirect]);
 

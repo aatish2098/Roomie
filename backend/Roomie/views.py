@@ -76,7 +76,7 @@ def register(request):
             response_data = {'message': "User created successfully"}
             return Response(response_data)
         else:
-            response_data = {'message': "Invalid Credentials: Username Possibly Already Taken"}
+            response_data = {'message': "Username Already Taken"}
             return Response(response_data)
     else:
         response_data = {'message': "Invalid Request"}
