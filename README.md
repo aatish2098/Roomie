@@ -1,28 +1,26 @@
-We implemented the following features for the project:
-
 **Basic Features**
 
-1. Login & Registration with User Session Handle -- fh818
-2. Search Certain Apartment Units -- jwf295
-3. Register Pet -- fh818
-4. Post and View Interests -- ab10047
-5. Display Unit and Building Info -- fh818
+1. Login & Registration with User Session Handle
+2. Search Certain Apartment Unit
+3. Register Pets
+4. Post and View Interests
+5. Display Unit and Building Info
 
 
 **Additional Features**
 
-6. Advanced Search of Units -- jwf295
-7. Search Interest -- ab10047
-8. Estimate Monthly Rent -- ab10047
-9. Favourite -- fh818
-10. Extra View on the Rent Price -- ab10047
-11. Comment System -- jwf295
+6. Advanced Search of Units
+7. Search Interest
+8. Estimate Monthly Rent
+9. Favourite 
+10. Extra View on the Rent Price
+11. Comment System 
 
 
 **Application Related Features**
 
-12. Sessions -- fh818
-13. Necessary Security Mechanism -- ab10047
+12. Sessions
+13. Necessary Security Mechanism
 
 
 
